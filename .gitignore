@@ -128,4 +128,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Miscellaneous files/folders
 matching_game_server.code-workspace
+.vscode/
+firebaseConfig.json

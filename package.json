@@ -19,6 +19,9 @@
   "homepage": "https://github.com/DestefanoHub/matching_game_server#readme",
   "dependencies": {
     "body-parser": "^1.20.3",
-    "express": "^4.21.2"
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "firebase": "^11.3.1",
+    "helmet": "^8.0.0"
   }
 }

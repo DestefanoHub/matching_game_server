@@ -33,7 +33,7 @@ app.get('/getGames', async (req, res) => {
     let status = 200;
 
     if(!gamesData.totalGames){
-        status = 404;
+        status = 204;
     }
 
     res.status(status).json(gamesData);
@@ -44,7 +44,7 @@ app.get('/getRecentGames', async (req, res) => {
     let status = 200;
 
     if(!recentGames.length){
-        status = 404;
+        status = 204;
     }
 
     res.status(status).json(recentGames);
@@ -52,8 +52,8 @@ app.get('/getRecentGames', async (req, res) => {
 
 app.options('/saveGame');
 app.post('/saveGame', async (req, res) => {
-    console.log(req.body);
-    res.send('Matching Game Server up and running!');
+    await database.insertGame(req.body);
+    res.status(201).send();
 });
 
 app.listen(port);

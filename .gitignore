@@ -132,4 +132,4 @@ dist
 # Miscellaneous files/folders
 matching_game_server.code-workspace
 .vscode/
-firebaseConfig.json
+mongodb-credentials.json

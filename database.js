@@ -1,14 +1,16 @@
-const firebase = require('firebase/app');
-const firestore = require('firebase/firestore');
+const { MongoClient } = require('mongodb');
 
-const firebaseConfig = require('./firebaseConfig.json');
+const mongodbCreds = require('./mongodb-credentials.json')
 
-const app = firebase.initializeApp(firebaseConfig);
-const database = firestore.getFirestore(app);
+const uri = `mongodb+srv://${mongodbCreds.username}:${mongodbCreds.password}@matching-game.052nx.mongodb.net/?retryWrites=true&w=majority&appName=Matching-Game`;
+const client = new MongoClient(uri);
 
 exports.insertGame = async (game) => {
     try{
-        const docRef = await firestore.addDoc(firestore.collection(database, 'games'), {
+        await client.connect();
+        const database = client.db('matching-game');
+        const conn = database.collection('games');
+        const status = await conn.insertOne({
             player: game.player,
             difficulty: game.difficulty,
             hasWon: game.hasWon,
@@ -17,40 +19,52 @@ exports.insertGame = async (game) => {
             time: game.time,
             date: game.date
         });
-        console.log(docRef);
-    }catch (e){
-        console.log(e);
+    }catch(error){
+        console.log(error);
+    }finally{
+        await client.close();
     }
 };
 
 exports.getRecentGames = async () => {
-    const gamesArray = [];
-    const gamesQuery = firestore.query(firestore.collection(database, 'games'), firestore.orderBy('date', 'desc'), firestore.limit(5));
-    const games = await firestore.getDocs(gamesQuery);
-    games.forEach((game) => {
-        gamesArray.push(game.data());
-    });
-    return gamesArray;
+    let recentGames = null;
+    
+    try{
+        await client.connect();
+        const database = client.db('matching-game');
+        const conn = database.collection('games');
+        recentGames = await conn.find({}).sort({date: -1}).limit(5).toArray();
+    }catch(error){
+        console.log(error);
+    }finally{
+        await client.close();
+        return recentGames;
+    }
 };
 
 exports.getGames = async (player, winLoss, diff, sort, page) => {
-    const gamesArray = [];
+    const gamesData = {
+        games: null,
+        totalGames: 0
+    };
+    // const games = [];
     const recordsPerPage = 10;
-    let gamesQuery = firestore.collection(database, 'games');
-    
+    const whereParams = {};
+    let sortParams = {};
+
     //optional player search
     if(player !== null){
-        gamesQuery = firestore.query(gamesQuery, firestore.where('player', '==', player));
+        whereParams.player = player;
     }
 
     //required win/loss filter
     switch(winLoss){
         case 'w': {
-            gamesQuery = firestore.query(gamesQuery, firestore.where('hasWon', '==', true));
+            whereParams.hasWon = true;
             break;
         }
         case 'l': {
-            gamesQuery = firestore.query(gamesQuery, firestore.where('hasWon', '==', false));
+            whereParams.hasWon = false;
             break;
         }
         case 'a':
@@ -60,52 +74,57 @@ exports.getGames = async (player, winLoss, diff, sort, page) => {
 
     //required difficulty filter
     if(diff !== 0){
-        gamesQuery = firestore.query(gamesQuery, firestore.where('difficulty', '==', diff));
+        whereParams.difficulty = diff;
     }
 
     //required sort and order
     switch(sort){
-        case 'sd': {
-            gamesQuery = firestore.query(gamesQuery, firestore.orderBy('points', 'desc'));
+        case 'sa': {
+            sortParams = {'points': 1, 'date': -1};
             break;
         }
-        case 'sa': {
-            gamesQuery = firestore.query(gamesQuery, firestore.orderBy('points', 'asc'));
+        case 'sd': {
+            sortParams = {'points': -1, 'date': -1};
             break;
         }
         case 'da': {
-            gamesQuery = firestore.query(gamesQuery, firestore.orderBy('date', 'asc'));
+            sortParams = {'date': 1};
             break;
         }
         case 'dd':
         default: {
-            gamesQuery = firestore.query(gamesQuery, firestore.orderBy('date', 'desc'));
+            sortParams = {'date': -1};
             break;
         }
     }
 
-    //get total number of filtered games
-    const totalGamesQuery = await firestore.getCountFromServer(gamesQuery);
-    const totalGames = totalGamesQuery.data().count;
+    try{
+        await client.connect();
+        const database = client.db('matching-game');
+        const conn = database.collection('games');
+        gamesCursor = await conn.aggregate([
+            {
+                $match: whereParams,
+            },
+            {
+                $sort: sortParams,
+            },
+            {
+                $facet: {
+                    metadata: [{ $count: 'totalCount' }],
+                    data: [{ $skip: (page * recordsPerPage) - recordsPerPage }, { $limit: recordsPerPage }],
+                },
+            },
+        ]);
 
-    //pagination - ten records per page
-    if(page === 1){
-        gamesQuery = firestore.query(gamesQuery, firestore.limit(recordsPerPage));
-    }else{
-        const previousRecords = (page * recordsPerPage) - recordsPerPage;
-        gamesQuery = firestore.query(gamesQuery, firestore.limit(previousRecords));
-        const pageSetup = await firestore.getDocs(gamesQuery);
-        const lastRecord = pageSetup.docs[pageSetup.docs.length - 1];
-        gamesQuery = firestore.query(gamesQuery, firestore.startAfter(lastRecord), firestore.limit(recordsPerPage));
+        for await(const queryData of gamesCursor) {
+            gamesData.totalGames = queryData.metadata[0].totalCount;
+            gamesData.games = queryData.data;
+        }
+    }catch(error){
+        console.log(error);
+    }finally{
+        await client.close();
+        return gamesData;
     }
-    
-    const games = await firestore.getDocs(gamesQuery);
-    games.forEach((game) => {
-        gamesArray.push(game.data());
-    });
-
-    return {
-        games: gamesArray,
-        totalGames: totalGames
-    };
 };

@@ -1,56 +1,79 @@
 const { MongoClient } = require('mongodb');
 
-const mongodbCreds = require('./mongodb-credentials.json')
+const { Game } = require('./Game');
+
+const mongodbCreds = require('./mongodb-credentials.json');
 
 const uri = `mongodb+srv://${mongodbCreds.username}:${mongodbCreds.password}@matching-game.052nx.mongodb.net/?retryWrites=true&w=majority&appName=Matching-Game`;
 const client = new MongoClient(uri);
 
 exports.insertGame = async (game) => {
-    try{
-        await client.connect();
-        const database = client.db('matching-game');
-        const conn = database.collection('games');
-        const status = await conn.insertOne({
-            player: game.player,
-            difficulty: game.difficulty,
-            hasWon: game.hasWon,
-            points: game.points,
-            totalPoints: game.totalPoints,
-            time: game.time,
-            date: game.date
-        });
-    }catch(error){
-        console.log(error);
-    }finally{
-        await client.close();
-    }
-};
-
-exports.getRecentGames = async () => {
-    let recentGames = null;
+    let didError = false;
     
     try{
         await client.connect();
         const database = client.db('matching-game');
         const conn = database.collection('games');
-        recentGames = await conn.find({}).sort({date: -1}).limit(5).toArray();
+        const result = await conn.insertOne(game);
+        
+        if(!result.acknowledged){
+            didError = true;
+        }
     }catch(error){
+        didError = true;
         console.log(error);
     }finally{
         await client.close();
-        return recentGames;
+
+        return didError;
+    }
+};
+
+exports.getRecentGames = async () => {
+    const recentGamesData = {
+        recentGames: [],
+        didError: false
+    }
+    
+    try{
+        await client.connect();
+        const database = client.db('matching-game');
+        const conn = database.collection('games');
+        const queryRecentGames = await conn.find().sort({date: -1}).limit(5).toArray();
+
+        queryRecentGames.forEach((gameData) => {
+            const game = new Game(
+                gameData.player,
+                gameData.difficulty,
+                gameData.hasWon,
+                gameData.points,
+                gameData.totalPoints,
+                gameData.time,
+                gameData.date,
+                gameData.id
+            );
+
+            recentGamesData.recentGames.push(game);
+        });
+    }catch(error){
+        recentGamesData.didError = true;
+        console.log(error);
+    }finally{
+        await client.close();
+        return recentGamesData;
     }
 };
 
 exports.getGames = async (player, winLoss, diff, sort, page) => {
     const gamesData = {
-        games: null,
-        totalGames: 0
+        games: [],
+        totalGames: 0,
+        didError: false
     };
-    // const games = [];
     const recordsPerPage = 10;
     const whereParams = {};
     let sortParams = {};
+    let queryGames = [];
 
     //optional player search
     if(player !== null){
@@ -119,9 +142,25 @@ exports.getGames = async (player, winLoss, diff, sort, page) => {
 
         for await(const queryData of gamesCursor) {
             gamesData.totalGames = queryData.metadata[0].totalCount;
-            gamesData.games = queryData.data;
+            queryGames = queryData.data;
         }
+
+        queryGames.forEach((gameData) => {
+            const game = new Game(
+                gameData.player,
+                gameData.difficulty,
+                gameData.hasWon,
+                gameData.points,
+                gameData.totalPoints,
+                gameData.time,
+                gameData.date,
+                gameData._id
+            );
+
+            gamesData.games.push(game);
+        });
     }catch(error){
+        gamesData.didError = true;
         console.log(error);
     }finally{
         await client.close();

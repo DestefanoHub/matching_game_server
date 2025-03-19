@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 
 const database = require('./database');
+const { Game } = require('./Game');
 
 const app = express();
 const port = 3100;
@@ -16,7 +17,7 @@ app.use(helmet({
 app.use(cors({
     origin: 'http://localhost:3000',
     methods: 'GET,POST',
-    allowedHeaders: 'Content-Type',
+    allowedHeaders: 'Content-Type,Accept',
     preflightContinue: true
 }));
 
@@ -36,24 +37,47 @@ app.get('/getGames', async (req, res) => {
         status = 204;
     }
 
+    if(gamesData.didError){
+        status = 500;
+    }
+
     res.status(status).json(gamesData);
 });
 
 app.get('/getRecentGames', async (req, res) => {
-    const recentGames = await database.getRecentGames();
+    const recentGamesData = await database.getRecentGames();
     let status = 200;
 
-    if(!recentGames.length){
+    if(!recentGamesData.recentGames.length){
         status = 204;
     }
 
-    res.status(status).json(recentGames);
+    if(recentGamesData.didError){
+        status = 500;
+    }
+
+    res.status(status).json(recentGamesData.recentGames);
 });
 
 app.options('/saveGame');
 app.post('/saveGame', async (req, res) => {
-    await database.insertGame(req.body);
-    res.status(201).send();
+    const game = new Game(
+        req.body.player,
+        req.body.difficulty,
+        req.body.hasWon,
+        req.body.points,
+        req.body.totalPoints,
+        req.body.time
+    );
+    let status = 201;
+
+    const didInsert = await database.insertGame(game);
+
+    if(!didInsert){
+        status = 500;
+    }
+
+    res.status(status).send();
 });
 
 app.listen(port);

@@ -141,7 +141,11 @@ exports.getGames = async (player, winLoss, diff, sort, page) => {
         ]);
 
         for await(const queryData of gamesCursor) {
-            gamesData.totalGames = queryData.metadata[0].totalCount;
+            //This assignment errors if the query returns no results, the array will be empty.
+            if(queryData.metadata.length){
+                gamesData.totalGames = queryData.metadata[0].totalCount;
+            }
+            
             queryGames = queryData.data;
         }
 

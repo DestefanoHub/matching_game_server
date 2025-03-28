@@ -1,11 +1,10 @@
-const { MongoClient } = require('mongodb');
+// const { MongoClient } = require('mongodb');
 
-const { Game } = require('./Game');
 
-const mongodbCreds = require('./mongodb-credentials.json');
+// const mongodbCreds = require('./mongodb-credentials.json');
 
-const uri = `mongodb+srv://${mongodbCreds.username}:${mongodbCreds.password}@matching-game.052nx.mongodb.net/?retryWrites=true&w=majority&appName=Matching-Game`;
-const client = new MongoClient(uri);
+// const uri = `mongodb+srv://${mongodbCreds.username}:${mongodbCreds.password}@matching-game.052nx.mongodb.net/?retryWrites=true&w=majority&appName=Matching-Game`;
+// const client = new MongoClient(uri);
 
 exports.insertGame = async (game) => {
     let didError = false;

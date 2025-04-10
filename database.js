@@ -1,69 +1,74 @@
-// const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 
+const Game = require('./Game');
 
-// const mongodbCreds = require('./mongodb-credentials.json');
+const mongodbCreds = require('./mongodb-credentials.json');
+const mongoDBURL = `mongodb+srv://${mongodbCreds.username}:${mongodbCreds.password}@matching-game.052nx.mongodb.net/matching-game?retryWrites=true&w=majority&appName=Matching-Game`;
 
-// const uri = `mongodb+srv://${mongodbCreds.username}:${mongodbCreds.password}@matching-game.052nx.mongodb.net/?retryWrites=true&w=majority&appName=Matching-Game`;
-// const client = new MongoClient(uri);
+exports.connect = () => {
+    mongoose.connect(mongoDBURL);
+}
 
-exports.insertGame = async (game) => {
-    let didError = false;
+exports.insertGame = async (player, difficulty, hasWon, points, totalPoints, time) => {
+    const savedGameData = {
+        game: {},
+        didError: false
+    };
     
-    try{
-        await client.connect();
-        const database = client.db('matching-game');
-        const conn = database.collection('games');
-        const result = await conn.insertOne(game);
-        
-        if(!result.acknowledged){
-            didError = true;
-        }
-    }catch(error){
-        didError = true;
-        console.log(error);
-    }finally{
-        await client.close();
+    const game = new Game({
+        player,
+        difficulty,
+        hasWon,
+        points,
+        totalPoints,
+        date: new Date().toJSON(),
+        time
+    });
 
-        return didError;
+    try{
+        savedGameData.game = await game.save();
+    }catch(error){
+        console.log(error);
+        didError = true
     }
+
+    return savedGameData;
+};
+
+exports.getGameInfo = async (gameId) => {
+    const gameData = {
+        game: {},
+        stats: [],
+        didError: false
+    };
+
+    try{
+        gameData.game = await Game.findById(gameId);
+    }catch(error){
+        console.log(error);
+        gameData.didError = true;
+    }
+
+    return gameData;
 };
 
 exports.getRecentGames = async () => {
     const recentGamesData = {
-        recentGames: [],
+        games: [],
         didError: false
-    }
+    };
     
     try{
-        await client.connect();
-        const database = client.db('matching-game');
-        const conn = database.collection('games');
-        const queryRecentGames = await conn.find().sort({date: -1}).limit(5).toArray();
-
-        queryRecentGames.forEach((gameData) => {
-            const game = new Game(
-                gameData.player,
-                gameData.difficulty,
-                gameData.hasWon,
-                gameData.points,
-                gameData.totalPoints,
-                gameData.time,
-                gameData.date,
-                gameData.id
-            );
-
-            recentGamesData.recentGames.push(game);
-        });
+        recentGamesData.games = await Game.find().sort({date: -1}).limit(5);
     }catch(error){
-        recentGamesData.didError = true;
         console.log(error);
-    }finally{
-        await client.close();
-        return recentGamesData;
+        recentGames.didError = true;
     }
+
+    return recentGamesData;
 };
 
-exports.getGames = async (player, winLoss, diff, sort, page) => {
+exports.getGames = async (player, winLoss, diff, sortBy, page) => {
     const gamesData = {
         games: [],
         totalGames: 0,
@@ -72,7 +77,8 @@ exports.getGames = async (player, winLoss, diff, sort, page) => {
     const recordsPerPage = 10;
     const whereParams = {};
     let sortParams = {};
-    let queryGames = [];
+
+    let status = 200;
 
     //optional player search
     if(player !== null){
@@ -100,7 +106,7 @@ exports.getGames = async (player, winLoss, diff, sort, page) => {
     }
 
     //required sort and order
-    switch(sort){
+    switch(sortBy){
         case 'sa': {
             sortParams = {'points': 1, 'date': -1};
             break;
@@ -121,10 +127,7 @@ exports.getGames = async (player, winLoss, diff, sort, page) => {
     }
 
     try{
-        await client.connect();
-        const database = client.db('matching-game');
-        const conn = database.collection('games');
-        gamesCursor = await conn.aggregate([
+        gamesCursor = await Game.aggregate([
             {
                 $match: whereParams,
             },
@@ -145,28 +148,12 @@ exports.getGames = async (player, winLoss, diff, sort, page) => {
                 gamesData.totalGames = queryData.metadata[0].totalCount;
             }
             
-            queryGames = queryData.data;
+            gamesData.games = queryData.data;
         }
-
-        queryGames.forEach((gameData) => {
-            const game = new Game(
-                gameData.player,
-                gameData.difficulty,
-                gameData.hasWon,
-                gameData.points,
-                gameData.totalPoints,
-                gameData.time,
-                gameData.date,
-                gameData._id
-            );
-
-            gamesData.games.push(game);
-        });
     }catch(error){
         gamesData.didError = true;
         console.log(error);
-    }finally{
-        await client.close();
-        return gamesData;
     }
+
+    return gamesData;
 };

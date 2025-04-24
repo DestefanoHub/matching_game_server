@@ -21,7 +21,6 @@ exports.insertGame = async (player, difficulty, hasWon, points, totalPoints, tim
         hasWon,
         points,
         totalPoints,
-        date: new Date().toJSON(),
         time
     });
 
@@ -38,12 +37,52 @@ exports.insertGame = async (player, difficulty, hasWon, points, totalPoints, tim
 exports.getGameInfo = async (gameId) => {
     const gameData = {
         game: {},
-        stats: [],
+        stats: {},
         didError: false
     };
 
     try{
         gameData.game = await Game.findById(gameId);
+
+        const isFirstGame = await Game.find({
+            player: gameData.player
+        }).countDocuments();
+        gameData.stats.isFirstGame = (isFirstGame === 1) ? true : false;
+
+        const isFirstWin = await Game.find({
+            player: gameData.player,
+            hasWon: true
+        }).countDocuments();
+        gameData.stats.isFirstWin = (isFirstWin === 1) ? true : false;
+
+        const isFirstDiffGame = await Game.find({
+            player: gameData.player,
+            difficulty: gameData.difficulty
+        }).countDocuments();
+        gameData.stats.isFirstDiffGame = (isFirstDiffGame === 1) ? true : false;
+
+        const isFirstDiffWin = await Game.find({
+            player: gameData.player,
+            difficulty: gameData.difficulty,
+            hasWon: true
+        }).countDocuments();
+        gameData.stats.isFirstDiffWin = (isFirstDiffWin === 1) ? true : false;
+
+        const isHighestDiffScore = await Game.find({
+            player: gameData.player,
+            difficulty: gameData.difficulty,
+            hasWon: true,
+            points: {$gt: gameData.points}
+        }).countDocuments();
+        gameData.stats.isHighestDiffScore = (isHighestDiffScore === 0) ? true : false;
+
+        const isFastestDiffTime = await Game.find({
+            player: gameData.player,
+            difficulty: gameData.difficulty,
+            hasWon: true,
+            time: {$lt: gameData.time}
+        }).countDocuments();
+        gameData.stats.isFastestDiffTime = (isFastestDiffTime === 0) ? true : false;
     }catch(error){
         console.log(error);
         gameData.didError = true;

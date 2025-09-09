@@ -133,3 +133,4 @@ dist
 matching_game_server.code-workspace
 .vscode/
 mongodb-credentials.json
+dist

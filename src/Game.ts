@@ -1,7 +1,9 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
+import { type Game as GameType } from './types.js';
 
 const Schema = mongoose.Schema;
-const gameSchema = new Schema({
+const gameSchema = new Schema<GameType>({
     player: {
         type: String,
         trim: true,
@@ -39,4 +41,4 @@ const gameSchema = new Schema({
     },
 });
 
-module.exports = mongoose.model('Game', gameSchema);
+export default mongoose.model<GameType>('Game', gameSchema);

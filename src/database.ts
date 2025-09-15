@@ -81,44 +81,50 @@ export async function getGameInfo(gameId: string): Promise<GameData> {
         gameData.game = await Game.findById(gameId).lean().exec() as GameType;
 
         const isFirstGame = await Game.find({
-            player: gameData.game.player
-        }).countDocuments().exec();
-        gameData.stats.isFirstGame = (isFirstGame === 1) ? true : false;
-
-        const isFirstWin = await Game.find({
             player: gameData.game.player,
-            hasWon: true
+            date: {$lt: gameData.game.date}
         }).countDocuments().exec();
-        gameData.stats.isFirstWin = (isFirstWin === 1) ? true : false;
+        gameData.stats.isFirstGame = (!isFirstGame) ? true : false;
 
         const isFirstDiffGame = await Game.find({
             player: gameData.game.player,
+            date: {$lt: gameData.game.date},
             difficulty: gameData.game.difficulty
         }).countDocuments().exec();
-        gameData.stats.isFirstDiffGame = (isFirstDiffGame === 1) ? true : false;
-
-        const isFirstDiffWin = await Game.find({
-            player: gameData.game.player,
-            difficulty: gameData.game.difficulty,
-            hasWon: true
-        }).countDocuments().exec();
-        gameData.stats.isFirstDiffWin = (isFirstDiffWin === 1) ? true : false;
+        gameData.stats.isFirstDiffGame = (!isFirstDiffGame) ? true : false;
 
         const isHighestDiffScore = await Game.find({
             player: gameData.game.player,
             difficulty: gameData.game.difficulty,
-            hasWon: true,
             points: {$gt: gameData.game.points}
         }).countDocuments().exec();
-        gameData.stats.isHighestDiffScore = (isHighestDiffScore === 0) ? true : false;
+        gameData.stats.isHighestDiffScore = (!isHighestDiffScore) ? true : false;
 
-        const isFastestDiffTime = await Game.find({
-            player: gameData.game.player,
-            difficulty: gameData.game.difficulty,
-            hasWon: true,
-            time: {$lt: gameData.game.time}
-        }).countDocuments().exec();
-        gameData.stats.isFastestDiffTime = (isFastestDiffTime === 0) ? true : false;
+        if(gameData.game.hasWon){
+            const isFirstWin = await Game.find({
+                player: gameData.game.player,
+                date: {$lt: gameData.game.date},
+                hasWon: true
+            }).countDocuments().exec();
+            gameData.stats.isFirstWin = (!isFirstWin) ? true : false;
+
+            const isFirstDiffWin = await Game.find({
+                player: gameData.game.player,
+                date: {$lt: gameData.game.date},
+                difficulty: gameData.game.difficulty,
+                hasWon: true
+            }).countDocuments().exec();
+            gameData.stats.isFirstDiffWin = (!isFirstDiffWin) ? true : false;
+
+            const isFastestDiffTime = await Game.find({
+                player: gameData.game.player,
+                // date: {$lt: gameData.game.date},
+                difficulty: gameData.game.difficulty,
+                hasWon: true,
+                time: {$lt: gameData.game.time}
+            }).countDocuments().exec();
+            gameData.stats.isFastestDiffTime = (!isFastestDiffTime) ? true : false;
+        }
     }catch(error){
         throw new Error("404", {cause: error});
     }
@@ -134,7 +140,7 @@ export async function getRecentGames(): Promise<any> {
     }
 };
 
-export async function getGames(player: string|null, winLoss: WinLoss, diff: Difficulty, sortBy: SortBy, page: number): Promise<MultiGamesData> {
+export async function getGames(player: string|null, winLoss: WinLoss, diff: Difficulty, sortBy: SortBy, page: number): Promise<MultiGamesData> {    
     const gamesData: MultiGamesData = {
         games: [],
         totalGames: 0

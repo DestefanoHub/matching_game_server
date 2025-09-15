@@ -41,4 +41,6 @@ const gameSchema = new Schema<GameType>({
     },
 });
 
-export default mongoose.model<GameType>('Game', gameSchema);
+interface GameModel extends mongoose.Model<GameType>{};
+
+export default mongoose.model<GameType, GameModel>('Game', gameSchema);

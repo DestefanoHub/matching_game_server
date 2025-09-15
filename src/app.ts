@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 
 import { connect, getGameInfo, getGames, getRecentGames, insertGame } from './database.js';
-import { type Difficulty, type WinLoss, type SortBy, isSortBy, isWinLoss, isDifficulty } from './types.js';
+import { type Difficulty, type WinLoss, type SortBy, isSortByType, isWinLossType, isDifficultyType } from './types.js';
 
 const app = express();
 const port = 3100;
@@ -48,13 +48,13 @@ app.get('/getGames', async (req, res, next) => {
     let status = 200;
     let gamesData;
     const player = (typeof req.query.player === 'string' && req.query.player.length) ? req.query.player : null;
-    const winLoss: WinLoss = (isWinLoss(req.query.winLoss)) ? req.query.winLoss : 'a';
-    const diff: Difficulty = (isDifficulty(req.query.diff)) ? req.query.diff : 0;
-    const sortBy: SortBy = (isSortBy(req.query.sortBy)) ? req.query.sortBy : 'dd';
+    const winLoss: WinLoss = (isWinLossType(req.query.winLoss)) ? req.query.winLoss : 'a';
+    const diff: Difficulty = (req.query.diff && isDifficultyType(+req.query.diff)) ? +req.query.diff as Difficulty : 0;
+    const sortBy: SortBy = (isSortByType(req.query.sortBy)) ? req.query.sortBy : 'dd';
     const page = (req.query.page) ? +req.query.page : 1;
 
     try{
-        const gamesData = await getGames(player, winLoss, diff, sortBy, page);
+        gamesData = await getGames(player, winLoss, diff, sortBy, page);
 
         if(!gamesData.totalGames){
             status = 204;

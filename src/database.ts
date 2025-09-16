@@ -29,7 +29,6 @@ type PlayerStats = {
     isFirstWin: boolean,
     isFirstDiffGame: boolean,
     isFirstDiffWin: boolean,
-    isHighestDiffScore: boolean,
     isFastestDiffTime: boolean
 };
 
@@ -64,7 +63,7 @@ export async function insertGame(player: string, difficulty: Difficulty, hasWon:
     }    
 };
 
-export async function getGameInfo(gameId: string): Promise<GameData> {
+export async function getGameInfo(gameId: string | Types.ObjectId): Promise<GameData> {
     const gameData: GameData = {
         game: {},
         stats: {
@@ -72,7 +71,6 @@ export async function getGameInfo(gameId: string): Promise<GameData> {
             isFirstWin: false,
             isFirstDiffGame: false,
             isFirstDiffWin: false,
-            isHighestDiffScore: false,
             isFastestDiffTime: false
         },
     };
@@ -92,13 +90,6 @@ export async function getGameInfo(gameId: string): Promise<GameData> {
             difficulty: gameData.game.difficulty
         }).countDocuments().exec();
         gameData.stats.isFirstDiffGame = (!isFirstDiffGame) ? true : false;
-
-        const isHighestDiffScore = await Game.find({
-            player: gameData.game.player,
-            difficulty: gameData.game.difficulty,
-            points: {$gt: gameData.game.points}
-        }).countDocuments().exec();
-        gameData.stats.isHighestDiffScore = (!isHighestDiffScore) ? true : false;
 
         if(gameData.game.hasWon){
             const isFirstWin = await Game.find({

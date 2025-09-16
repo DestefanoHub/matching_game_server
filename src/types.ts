@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 export type SortBy = 'sa'|'sd'|'da'|'dd';
 
@@ -19,6 +19,7 @@ export function isDifficultyType(value: unknown): value is Difficulty {
 }
 
 export interface Game extends mongoose.Document {
+    _id: Types.ObjectId,
     date?: Date,
     player: string,
     difficulty: number,

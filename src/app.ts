@@ -85,7 +85,7 @@ app.get('/getRecentGames', async (req, res, next) => {
 
 app.options('/saveGame');
 app.post('/saveGame', async (req, res, next) => {    
-    let savedGame;
+    let savedGame = {};
     const player: string = req.body.player;
     const difficulty: Difficulty = req.body.difficulty;
     const hasWon: boolean = req.body.hasWon;
@@ -94,8 +94,8 @@ app.post('/saveGame', async (req, res, next) => {
     const time: number = req.body.time;
 
     try{
-        savedGame = await insertGame(player, difficulty, hasWon, points, totalPoints, time);
-        // savedGameInfo = await getGameInfo(savedGameData.game._id!);
+        const recentGame = await insertGame(player, difficulty, hasWon, points, totalPoints, time);
+        savedGame = await getGameInfo(recentGame._id);
     }catch(error){
         return next(error);
     }

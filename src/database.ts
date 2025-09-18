@@ -76,7 +76,7 @@ export async function getGameInfo(gameId: string | Types.ObjectId): Promise<Game
     };
 
     try{
-        gameData.game = await Game.findById(gameId).lean().exec() as GameType;
+        gameData.game = await Game.findById(gameId).lean<GameType>().exec() as GameType;
 
         const isFirstGame = await Game.find({
             player: gameData.game.player,
@@ -123,9 +123,17 @@ export async function getGameInfo(gameId: string | Types.ObjectId): Promise<Game
     return gameData;
 };
 
-export async function getRecentGames(): Promise<any> {
+export async function getRecentGames(): Promise<[GameType?]> {
     try{
-        return await Game.find().sort({date: -1}).limit(5).lean().exec();
+        return await Game.find({}, {
+            player: 1,
+            hasWon: 1,
+            difficulty: 1,
+            date: 1
+        }).sort({date: -1})
+        .limit(5)
+        .lean<[GameType?]>()
+        .exec();
     }catch(error){
         throw new Error("404", {cause: error});
     }
@@ -192,23 +200,31 @@ export async function getGames(player: string|null, winLoss: WinLoss, diff: Diff
                 $match: whereParams,
             },
             {
+                $project: {
+                    player: 1,
+                    hasWon: 1,
+                    difficulty: 1,
+                    date: 1
+                }
+            },
+            {
                 $sort: sortParams.sort,
             },
             {
                 $facet: {
-                    metadata: [{ $count: 'totalCount' }],
-                    data: [{ $skip: (page * recordsPerPage) - recordsPerPage }, { $limit: recordsPerPage }],
+                    count: [{ $count: 'totalCount' }],
+                    games: [{ $skip: (page * recordsPerPage) - recordsPerPage }, { $limit: recordsPerPage }],
                 },
             },
         ]);
 
         for await(const queryData of gamesCursor) {
             //This assignment errors if the query returns no results, the array will be empty.
-            if(queryData.metadata.length){
-                gamesData.totalGames = queryData.metadata[0].totalCount;
+            if(queryData.count.length){
+                gamesData.totalGames = queryData.count[0].totalCount;
             }
             
-            gamesData.games = queryData.data;
+            gamesData.games = queryData.games;
         }
     }catch(error){
         throw new Error("404", {cause: error});

@@ -1,12 +1,7 @@
 import mongoose, { Types } from 'mongoose';
 
 import Game from './Game.js';
-import {
-    type Game as GameType,
-    type Difficulty,
-    type SortBy,
-    type WinLoss
-} from './types.js';
+import type { Game as GameType, Difficulty, SortBy, WinLoss } from './types.js';
 
 import mongodbCreds from '../mongodb-credentials.json' with {type: 'json'};
 const mongoDBURL = `mongodb+srv://${mongodbCreds.username}:${mongodbCreds.password}@matching-game.052nx.mongodb.net/matching-game?retryWrites=true&w=majority&appName=Matching-Game`;
@@ -38,7 +33,7 @@ type GameData = {
 };
 
 type MultiGamesData = {
-    games: [GameType?],
+    games: GameType[],
     totalGames: number
 };
 

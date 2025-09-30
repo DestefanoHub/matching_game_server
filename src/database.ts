@@ -28,7 +28,7 @@ type PlayerStats = {
 };
 
 type GameData = {
-    game: GameType | Record<string, never>,
+    game: GameType | Record<PropertyKey, never>,
     stats: PlayerStats
 };
 

@@ -28,3 +28,11 @@ export interface Game extends mongoose.Document {
     totalPoints: number,
     time: number
 };
+
+export interface Player extends mongoose.Document {
+    _id: Types.ObjectId,
+    name: string,
+    password?: string,
+    salt?: string,
+    JWT?: string
+};

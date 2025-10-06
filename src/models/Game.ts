@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-import type { Game as GameType } from './types.js';
+import type { Game as GameType } from '../types.js';
 
 const Schema = mongoose.Schema;
 const gameSchema = new Schema<GameType>({

@@ -1,6 +1,6 @@
 {
   "name": "matching-game-server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "",
   "type": "module",
   "main": "./src/app.js",
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/DestefanoHub/matching_game_server#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "express": "^4.21.2",
@@ -27,6 +28,7 @@
     "mongoose": "^8.12.2"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/body-parser": "^1.19.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",

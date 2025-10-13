@@ -30,10 +30,30 @@ export default abstract class PlayerGateway {
         }
     }
 
-    public static async searchPlayers(searchTerm: string): Promise<PlayerType[]> {
+    public static async checkUsernameExists(username: string): Promise<number> {
         try{
-            const searchRegex = new RegExp(searchTerm, 'i');
-            return await Player.find({name: searchRegex}, {name: 1}).lean<PlayerType[]>().exec();
+            // const foundPlayer = await Player.aggregate([
+            //     {
+            //         $addFields: {upperName: {$toUpper: '$name'}},
+            //         $match: {name: username},
+            //         $count: 'matching_users'
+            //     }
+            // ]);
+            // console.log(foundPlayer);
+            return await Player.find({name: username.trim()}).countDocuments();
+        }catch(error){
+            throw new Error("400", {cause: error});
+        }
+    }
+
+    public static async searchPlayers(searchTerm: string): Promise<string[]> {
+        try{
+            if(!searchTerm){
+                throw new Error('400', {cause: 'No search term provided.'});
+            }
+
+            const searchRegex = new RegExp(searchTerm.trim(), 'i');
+            return await Player.find({name: searchRegex}, {name: 1}).lean<string[]>().exec();
         }catch(error){
             throw new Error("404", {cause: error});
         }
@@ -58,7 +78,7 @@ export default abstract class PlayerGateway {
         }
     }
 
-    public static async authenticate(name: string, password: string) {
+    public static async login(name: string, password: string) {
         try{
             const player = await Player.findOne({name}).lean<PlayerType>().exec() as PlayerType;
             return await bcrypt.compare(password, player.password!);

@@ -1,20 +1,21 @@
 import express from 'express';
 
-import GameGateway  from '../gateways/games.js';
+import GameGateway  from '../gateways/game.js';
+import authenticate from '../auth.js';
 import { type Difficulty, type WinLoss, type SortBy, isSortByType, isWinLossType, isDifficultyType } from '../types.js';
 
 const router = express.Router();
 
-router.get('/getGameInfo/:gameId', async (req, res, next) => {
+router.get('/getGameInfo/:gameID', async (req, res, next) => {
     let gameData;
-    const gameId = req.params.gameId;
+    const gameID = req.params.gameID;
 
-    if(!gameId){
+    if(!gameID){
         throw new Error('400', {cause: 'No game ID provided.'});
     }
 
     try{
-        gameData = await GameGateway.getGameInfo(gameId);
+        gameData = await GameGateway.getGameInfo(gameID);
 
         if(!Object.keys(gameData.game).length){
             throw new Error('404', {cause: 'Game not found.'});
@@ -66,7 +67,7 @@ router.get('/getRecentGames', async (req, res, next) => {
 });
 
 router.options('/saveGame');
-router.post('/saveGame', async (req, res, next) => {    
+router.post('/saveGame', authenticate, async (req, res, next) => {    
     let savedGame = {};
     const player: string = req.body.player;
     const difficulty: Difficulty = req.body.difficulty;

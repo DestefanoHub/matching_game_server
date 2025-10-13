@@ -9,7 +9,8 @@ const playerSchema = new Schema<Player>({
         trim: true,
         required: true,
         minlength: 5,
-        maxlength: 30
+        maxlength: 30,
+        unique: true
     },
     password: {
         type: String,

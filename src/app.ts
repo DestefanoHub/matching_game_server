@@ -20,15 +20,15 @@ app.use(helmet({
 
 app.use(cors({
     origin: 'http://localhost:3000',
-    methods: 'GET,POST',
-    allowedHeaders: 'Content-Type,Accept',
+    methods: 'GET,POST,PATCH,DELETE',
+    allowedHeaders: 'Content-Type,Accept,Authorization',
     preflightContinue: true
 }));
 
 app.use(bodyParser.json());
 
-app.use('/games/', GameRouter);
-app.use('/player/', PlayerRouter);
+app.use('/game', GameRouter);
+app.use('/player', PlayerRouter);
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     console.log(error.cause);

@@ -78,12 +78,21 @@ export default abstract class PlayerGateway {
         }
     }
 
-    public static async login(name: string, password: string) {
+    public static async login(name: string, password: string): Promise<{_id: Types.ObjectId, name: string}> {
         try{
-            const player = await Player.findOne({name}).lean<PlayerType>().exec() as PlayerType;
-            return await bcrypt.compare(password, player.password!);
+            const player = await Player.findOne({name}).lean<PlayerType>().exec();
+
+            if(player !== null){
+                const isValid = await bcrypt.compare(password, player.password!);
+
+                if(isValid){
+                    return player;
+                }
+            }
+
+            throw new Error("401", {cause: 'Invalid credentials.'});
         }catch(error){
-            throw new Error("401", {cause: error});
+            throw new Error("400", {cause: error});
         }
     }
 

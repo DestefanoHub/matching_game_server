@@ -1,7 +1,8 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 
 import PlayerGateway from '../gateways/player.js';
-import authenticate from '../auth.js';
+import { authenticate, generateToken } from '../auth.js';
 
 const router = express.Router();
 
@@ -130,7 +131,24 @@ router.post('/createAccount', async (req, res, next) => {
 
 router.options('/login');
 router.post('/login', async (req, res, next) => {
-    // await PlayerGateway.login();
+    let status = 201;
+    let userCreds = null;
+    const username: string = req.body.username;
+    const password: string = req.body.password;
+    
+    try{
+        const userData = await PlayerGateway.login(username, password);
+        const token = generateToken(userData._id, userData.name);
+        userCreds = {
+            ID: userData._id,
+            username: userData.name,
+            JWT: token
+        };
+    }catch(error){
+        status = 401;
+    }
+
+    res.status(status).json(userCreds);
 });
 
 router.options('/changePassword');

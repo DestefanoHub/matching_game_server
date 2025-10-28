@@ -1,7 +1,7 @@
 import express from 'express';
 
 import GameGateway  from '../gateways/game.js';
-import authenticate from '../auth.js';
+import { authenticate } from '../auth.js';
 import { type Difficulty, type WinLoss, type SortBy, isSortByType, isWinLossType, isDifficultyType } from '../types.js';
 
 const router = express.Router();

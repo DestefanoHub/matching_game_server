@@ -46,6 +46,21 @@ export default abstract class PlayerGateway {
         }
     }
 
+    public static async checkPasswordsMatch(id: string, newPassword: string): Promise<boolean> {
+        try{
+            const player = await this.getPlayerByID(id);
+            const newHash = await bcrypt.hash(newPassword, player.salt!);
+
+            if(newHash === player.password){
+                return true;
+            }
+
+            return false;
+        }catch(error){
+            throw new Error("404", {cause: error});
+        }
+    }
+
     public static async searchPlayers(searchTerm: string): Promise<string[]> {
         try{
             if(!searchTerm){
@@ -95,6 +110,4 @@ export default abstract class PlayerGateway {
             throw new Error("400", {cause: error});
         }
     }
-
-    public static async validate() {}
 }

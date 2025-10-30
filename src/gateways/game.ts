@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 import Game from '../models/Game.js';
-import type { Game as GameType, Difficulty, SortBy, WinLoss } from '../types.js';
+import type { Game as GameType, Difficulty, SortBy, WinLoss, GamePlayer } from '../types.js';
 
 type SortParams = {
     sort: {
@@ -35,7 +35,7 @@ type MultiGamesData = {
 };
 
 export default abstract class GameGateway {    
-    public static async insertGame(player: string, difficulty: Difficulty, hasWon: boolean, points: number, totalPoints: number, time: number): Promise<GameType> {
+    public static async insertGame(player: GamePlayer, difficulty: Difficulty, hasWon: boolean, points: number, totalPoints: number, time: number): Promise<GameType> {
         const game = new Game({
             player,
             difficulty,
@@ -128,7 +128,7 @@ export default abstract class GameGateway {
         }
     }
 
-    public static async getGames(player: string|null, winLoss: WinLoss, diff: Difficulty, sortBy: SortBy, page: number): Promise<MultiGamesData> {    
+    public static async getGames(playerName: string|null, winLoss: WinLoss, diff: Difficulty, sortBy: SortBy, page: number): Promise<MultiGamesData> {    
         const gamesData: MultiGamesData = {
             games: [],
             totalGames: 0
@@ -138,8 +138,9 @@ export default abstract class GameGateway {
         let sortParams: SortParams = {sort: {}};
 
         //optional player search
-        if(player !== null){
-            whereParams.player = player;
+        if(playerName !== null){
+            //@ts-expect-error
+            whereParams.player.username = playerName;
         }
 
         //required win/loss filter

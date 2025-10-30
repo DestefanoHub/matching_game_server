@@ -1,12 +1,17 @@
 import mongoose from 'mongoose';
 
-import type { Game as GameType } from '../types.js';
+import type { Game as GameType, GamePlayer } from '../types.js';
 
 const Schema = mongoose.Schema;
+
+const gamePlayerSchema = new Schema<GamePlayer>({
+    id: String,
+    username: String
+});
+
 const gameSchema = new Schema<GameType>({
     player: {
-        type: String,
-        trim: true,
+        type: gamePlayerSchema,
         required: true
     },
     date: {

@@ -1,5 +1,12 @@
 declare namespace Express{
     export interface Request {
-        JWT?: string;
+        token?: {
+            exp: number,
+            iat: number
+            id: string,
+            iss: string,
+            sub: string,
+            username: string
+        }
     }
 }

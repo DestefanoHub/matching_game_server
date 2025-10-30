@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 
 import PlayerGateway from '../gateways/player.js';
-import { authenticate, generateToken } from '../auth.js';
+import { checkAuthorization, generateToken } from '../auth.js';
 
 const router = express.Router();
 
@@ -18,7 +18,7 @@ router.get('/getPlayer/:playerID', async (req, res, next) => {
         playerData = await PlayerGateway.getPlayerByID(playerID);
         res.status(200).json(playerData);
     }catch(error){
-        return next(error);
+        next(error);
     }
 });
 
@@ -39,7 +39,7 @@ router.get('/checkUsername/:username', async (req, res, next) => {
 
         res.status(status).end();
     }catch(error){
-        return next(error);
+        next(error);
     }
 });
 
@@ -61,7 +61,7 @@ router.get('/searchPlayers/:player', async (req, res, next) => {
 
         res.status(status).json(players);
     }catch(error){
-        return next(error);
+        next(error);
     }
 });
 
@@ -96,37 +96,41 @@ router.post('/createAccount', async (req, res, next) => {
         usernameObj.message = 'Username too long.';
     }
 
-    const usernameExists = await PlayerGateway.checkUsernameExists(usernameObj.value);
+    try{
+        const usernameExists = await PlayerGateway.checkUsernameExists(usernameObj.value);
 
-    if(usernameExists){
-        usernameObj.error = true;
-        usernameObj.message = 'Username unavailable.';
-    }
+        if(usernameExists){
+            usernameObj.error = true;
+            usernameObj.message = 'Username unavailable.';
+        }
 
-    if(passwordObj.value.length < 12) {
-        passwordObj.error = true;
-        passwordObj.message = 'Password too short.';
-    }else if(passwordObj.value.length > 30) {
-        passwordObj.error = true;
-        passwordObj.message = 'Password too long.';
-    }
-    
-    if(confirmObj.value !== passwordObj.value) {
-        confirmObj.error = true;
-        confirmObj.message = 'Password does not match.';
-    }
+        if(passwordObj.value.length < 12) {
+            passwordObj.error = true;
+            passwordObj.message = 'Password too short.';
+        }else if(passwordObj.value.length > 30) {
+            passwordObj.error = true;
+            passwordObj.message = 'Password too long.';
+        }
+        
+        if(confirmObj.value !== passwordObj.value) {
+            confirmObj.error = true;
+            confirmObj.message = 'Password does not match.';
+        }
 
-    if(usernameObj.error || passwordObj.error || confirmObj.error){
-        status = 400;
-    }else{
-        await PlayerGateway.insertPlayer(usernameObj.value, passwordObj.value);
-    }
+        if(usernameObj.error || passwordObj.error || confirmObj.error){
+            status = 400;
+        }else{
+            await PlayerGateway.insertPlayer(usernameObj.value, passwordObj.value);
+        }
 
-    res.status(status).json({
-        usernameObj,
-        passwordObj,
-        confirmObj
-    });
+        res.status(status).json({
+            usernameObj,
+            passwordObj,
+            confirmObj
+        });
+    }catch(error){
+        next(error);
+    }
 });
 
 router.options('/login');
@@ -144,26 +148,80 @@ router.post('/login', async (req, res, next) => {
             username: userData.name,
             JWT: token
         };
-    }catch(error){
-        status = 401;
-    }
 
-    res.status(status).json(userCreds);
+        res.status(status).json(userCreds);
+    }catch(error){
+        next(error);
+    }
 });
 
 router.options('/changePassword');
-router.patch('/changePassword', authenticate, async (req, res, next) => {
-    // await PlayerGateway.changePassword();
+router.patch('/changePassword', checkAuthorization, async (req, res, next) => {
+    let status = 200;
+    const password: string = req.body.password;
+    const confirmPassword: string = req.body.confirmPassword;
+
+    const passwordObj = {
+        value: password,
+        error: false,
+        message: ''
+    };
+    const confirmObj = {
+        value: confirmPassword,
+        error: false,
+        message: ''
+    };
+
+    if(passwordObj.value.length < 12) {
+        passwordObj.error = true;
+        passwordObj.message = 'Password too short.';
+    }else if(passwordObj.value.length > 30) {
+        passwordObj.error = true;
+        passwordObj.message = 'Password too long.';
+    }
+    
+    if(confirmObj.value !== passwordObj.value) {
+        confirmObj.error = true;
+        confirmObj.message = 'Password does not match.';
+    }
+
+    try{
+        const isPasswordSame = await PlayerGateway.checkPasswordsMatch(req.token!.id, passwordObj.value);
+
+        if(isPasswordSame){
+            passwordObj.error = true;
+            passwordObj.message = 'New password cannot be your current password.';
+        }
+
+        if(passwordObj.error || confirmObj.error){
+            status = 400;
+        }else{
+            await PlayerGateway.changePassword(req.token!.id, passwordObj.value);
+        }
+
+        res.status(status).json({
+            passwordObj,
+            confirmObj
+        });
+    }catch(error){
+        next(error);
+    }
 });
 
 router.options('/logout');
-router.delete('/logout', authenticate, async (req, res, next) => {
+router.delete('/logout', checkAuthorization, async (req, res, next) => {
     // await PlayerGateway.deletePlayer();
 });
 
 router.options('/deleteAccount');
-router.delete('/deleteAccount', authenticate, async (req, res, next) => {
-    // await PlayerGateway.deletePlayer();
+router.delete('/deleteAccount', checkAuthorization, async (req, res, next) => {
+    try{
+        await PlayerGateway.deletePlayer(req.token!.id);
+
+        res.status(200).end();
+    }catch(error){
+        next(error);
+    }
 });
 
 export default router;

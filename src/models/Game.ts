@@ -5,7 +5,7 @@ import type { Game as GameType, GamePlayer } from '../types.js';
 const Schema = mongoose.Schema;
 
 const gamePlayerSchema = new Schema<GamePlayer>({
-    id: String,
+    pid: String,
     username: String
 });
 

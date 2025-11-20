@@ -11,7 +11,7 @@ type SortParams = {
 };
 
 type WhereParams = {
-    player?: string,
+    'player.username'?: string,
     hasWon?: boolean,
     difficulty?: Difficulty
 };
@@ -68,13 +68,13 @@ export default abstract class GameGateway {
             gameData.game = await Game.findById(id).lean<GameType>().exec() as GameType;
 
             const isFirstGame = await Game.find({
-                player: gameData.game.player,
+                'player.pid': gameData.game.player.pid,
                 date: {$lt: gameData.game.date}
             }).countDocuments().exec();
             gameData.stats.isFirstGame = (!isFirstGame) ? true : false;
 
             const isFirstDiffGame = await Game.find({
-                player: gameData.game.player,
+                'player.pid': gameData.game.player.pid,
                 date: {$lt: gameData.game.date},
                 difficulty: gameData.game.difficulty
             }).countDocuments().exec();
@@ -82,14 +82,14 @@ export default abstract class GameGateway {
 
             if(gameData.game.hasWon){
                 const isFirstWin = await Game.find({
-                    player: gameData.game.player,
+                    'player.pid': gameData.game.player.pid,
                     date: {$lt: gameData.game.date},
                     hasWon: true
                 }).countDocuments().exec();
                 gameData.stats.isFirstWin = (!isFirstWin) ? true : false;
 
                 const isFirstDiffWin = await Game.find({
-                    player: gameData.game.player,
+                    'player.pid': gameData.game.player.pid,
                     date: {$lt: gameData.game.date},
                     difficulty: gameData.game.difficulty,
                     hasWon: true
@@ -97,8 +97,7 @@ export default abstract class GameGateway {
                 gameData.stats.isFirstDiffWin = (!isFirstDiffWin) ? true : false;
 
                 const isFastestDiffTime = await Game.find({
-                    player: gameData.game.player,
-                    // date: {$lt: gameData.game.date},
+                    'player.pid': gameData.game.player.pid,
                     difficulty: gameData.game.difficulty,
                     hasWon: true,
                     time: {$lt: gameData.game.time}
@@ -134,13 +133,12 @@ export default abstract class GameGateway {
             totalGames: 0
         };
         const recordsPerPage = 10;
-        const whereParams: WhereParams = {};
+        let whereParams: WhereParams = {};
         let sortParams: SortParams = {sort: {}};
 
         //optional player search
         if(playerName !== null){
-            //@ts-expect-error
-            whereParams.player.username = playerName;
+            whereParams = {'player.username': playerName};
         }
 
         //required win/loss filter

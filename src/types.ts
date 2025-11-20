@@ -21,10 +21,7 @@ export function isDifficultyType(value: unknown): value is Difficulty {
 export interface Game extends mongoose.Document {
     _id: Types.ObjectId,
     date?: Date,
-    player: {
-        id: string,
-        username: string
-    },
+    player: GamePlayer,
     difficulty: number,
     hasWon: boolean,
     points: number,
@@ -41,6 +38,6 @@ export interface Player extends mongoose.Document {
 };
 
 export type GamePlayer = {
-    id: string,
+    pid: string,
     username: string
 };

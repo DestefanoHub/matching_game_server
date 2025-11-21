@@ -31,8 +31,15 @@ app.use('/game', GameRouter);
 app.use('/player', PlayerRouter);
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+    let errorCode = 500;
+
     console.log(error.cause);
-    res.status(+error.message).end();
+
+    if(!Number.isNaN(error.message)){
+        errorCode = +error.message;
+    }
+
+    res.status(errorCode).end();
 });
 
 try{

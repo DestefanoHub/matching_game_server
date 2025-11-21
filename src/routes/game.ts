@@ -78,9 +78,9 @@ router.post('/saveGame', checkAuthorization, async (req, res, next) => {
 
     try{
         const recentGame = await GameGateway.insertGame(player, difficulty, hasWon, points, totalPoints, time);
-        savedGame = await GameGateway.getGameInfo(recentGame._id);
+        // savedGame = await GameGateway.getGameInfo(recentGame._id);
 
-        res.status(201).json(savedGame);
+        res.status(201).json();
     }catch(error){
         next(error);
     }     

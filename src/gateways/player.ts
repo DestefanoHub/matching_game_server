@@ -5,7 +5,7 @@ import Player from '../models/Player.js';
 import type { Player as PlayerType } from '../types.js';
 
 export default abstract class PlayerGateway {
-    public static async insertPlayer(name: string, password: string): Promise<void> {
+    public static async insertPlayer(name: string, password: string): Promise<PlayerType> {
         try{
             const salt = await bcrypt.genSalt();
             const hash = await bcrypt.hash(password, salt);
@@ -16,7 +16,7 @@ export default abstract class PlayerGateway {
                 salt
             });
 
-            await player.save();
+            return await player.save();
         }catch(error){
             throw new Error("400", {cause: error});
         }
@@ -82,7 +82,7 @@ export default abstract class PlayerGateway {
         }
     }
 
-    public static async changePassword(id: string, newPassword: string) {
+    public static async changePassword(id: string, newPassword: string): Promise<void> {
         try{
             const salt = await bcrypt.genSalt();
             const hash = await bcrypt.hash(newPassword, salt);
@@ -93,7 +93,7 @@ export default abstract class PlayerGateway {
         }
     }
 
-    public static async login(name: string, password: string): Promise<{_id: Types.ObjectId, name: string}> {
+    public static async login(name: string, password: string): Promise<PlayerType> {
         try{
             const player = await Player.findOne({name}).lean<PlayerType>().exec();
 

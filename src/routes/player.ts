@@ -1,8 +1,8 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
 
 import PlayerGateway from '../gateways/player.js';
 import { checkAuthorization, generateToken } from '../auth.js';
+import type { Player as PlayerType } from '../types.js';
 
 const router = express.Router();
 
@@ -68,6 +68,7 @@ router.get('/searchPlayers/:player', async (req, res, next) => {
 router.options('/createAccount');
 router.post('/createAccount', async (req, res, next) => {
     let status = 201;
+    let newPlayerCreds = null;
     const username: string = req.body.username;
     const password: string = req.body.password;
     const confirmPassword: string = req.body.confirmPassword;
@@ -120,14 +121,23 @@ router.post('/createAccount', async (req, res, next) => {
         if(usernameObj.error || passwordObj.error || confirmObj.error){
             status = 400;
         }else{
-            await PlayerGateway.insertPlayer(usernameObj.value, passwordObj.value);
+            const newPlayer = await PlayerGateway.insertPlayer(usernameObj.value, passwordObj.value);
+            const token = generateToken(newPlayer._id, newPlayer.name);
+            newPlayerCreds = {
+                ID: newPlayer._id,
+                username: newPlayer.name,
+                JWT: token
+            };
         }
 
-        res.status(status).json({
-            usernameObj,
-            passwordObj,
-            confirmObj
-        });
+        res.status(status).json([
+            {
+                usernameObj,
+                passwordObj,
+                confirmObj
+            },
+            newPlayerCreds
+        ]);
     }catch(error){
         next(error);
     }

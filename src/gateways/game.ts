@@ -111,9 +111,11 @@ export default abstract class GameGateway {
         return gameData;
     }
 
-    public static async getRecentGames(): Promise<GameType[]> {
+    public static async getRecentGames(playerID: string | null): Promise<GameType[][]> {
         try{
-            return await Game.find({}, {
+            const recentGames: GameType[][] = [];
+
+            const allRecentGames = await Game.find({}, {
                 player: 1,
                 hasWon: 1,
                 difficulty: 1,
@@ -122,6 +124,27 @@ export default abstract class GameGateway {
             .limit(5)
             .lean<GameType[]>()
             .exec();
+
+            recentGames[0] = allRecentGames;
+
+            if(playerID !== null){
+                const playerRecentGames = await Game.find({
+                    'player.pid': playerID
+                },
+                {
+                    player: 1,
+                    hasWon: 1,
+                    difficulty: 1,
+                    date: 1
+                }).sort({date: -1})
+                .limit(5)
+                .lean<GameType[]>()
+                .exec();
+
+                recentGames[1] = playerRecentGames;
+            }
+
+            return recentGames;
         }catch(error){
             throw new Error("404", {cause: error});
         }

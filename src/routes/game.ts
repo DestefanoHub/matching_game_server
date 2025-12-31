@@ -49,12 +49,13 @@ router.get('/getGames', async (req, res, next) => {
     }
 });
 
-router.get('/getRecentGames', async (req, res, next) => {
+router.get('/getRecentGames/:playerID?', async (req, res, next) => {
     let status = 200;
     let recentGames;
+    const playerID = (req.params.playerID) ? req.params.playerID : null;
 
     try{
-        recentGames = await GameGateway.getRecentGames();
+        recentGames = await GameGateway.getRecentGames(playerID);
 
         if(!recentGames.length){
             status = 204;

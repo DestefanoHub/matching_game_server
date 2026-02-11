@@ -2,7 +2,7 @@ import express from 'express';
 
 import PlayerGateway from '../gateways/player.js';
 import { checkAuthorization, generateToken } from '../auth.js';
-import type { Player as PlayerType } from '../types.js';
+// import type { Player as PlayerType } from '../types.js';
 
 const router = express.Router();
 
@@ -43,27 +43,27 @@ router.get('/checkUsername/:username', async (req, res, next) => {
     }
 });
 
-router.get('/searchPlayers/:player', async (req, res, next) => {
-    let status = 200;
-    let players: string[] = [];
-    const player = req.params.player;
+// router.get('/searchPlayers/:player', async (req, res, next) => {
+//     let status = 200;
+//     let players: string[] = [];
+//     const player = req.params.player;
 
-    if(!player){
-        throw new Error('400', {cause: 'No search term provided.'});
-    }
+//     if(!player){
+//         throw new Error('400', {cause: 'No search term provided.'});
+//     }
 
-    try{
-        players = await PlayerGateway.searchPlayers(player);
+//     try{
+//         players = await PlayerGateway.searchPlayers(player);
 
-        if(!players.length){
-            status = 404;
-        }
+//         if(!players.length){
+//             status = 404;
+//         }
 
-        res.status(status).json(players);
-    }catch(error){
-        next(error);
-    }
-});
+//         res.status(status).json(players);
+//     }catch(error){
+//         next(error);
+//     }
+// });
 
 router.options('/createAccount');
 router.post('/createAccount', async (req, res, next) => {

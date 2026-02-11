@@ -61,18 +61,18 @@ export default abstract class PlayerGateway {
         }
     }
 
-    public static async searchPlayers(searchTerm: string): Promise<string[]> {
-        try{
-            if(!searchTerm){
-                throw new Error('400', {cause: 'No search term provided.'});
-            }
+    // public static async searchPlayers(searchTerm: string): Promise<string[]> {
+    //     try{
+    //         if(!searchTerm){
+    //             throw new Error('400', {cause: 'No search term provided.'});
+    //         }
 
-            const searchRegex = new RegExp(searchTerm.trim(), 'i');
-            return await Player.find({name: searchRegex}, {name: 1}).lean<string[]>().exec();
-        }catch(error){
-            throw new Error("404", {cause: error});
-        }
-    }
+    //         const searchRegex = new RegExp(searchTerm.trim(), 'i');
+    //         return await Player.find({name: searchRegex}, {name: 1}).lean<string[]>().exec();
+    //     }catch(error){
+    //         throw new Error("404", {cause: error});
+    //     }
+    // }
 
     public static async deletePlayer(id: string): Promise<void> {
         try{

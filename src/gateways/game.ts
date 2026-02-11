@@ -227,7 +227,13 @@ export default abstract class GameGateway {
                         games: [{ $skip: (page * recordsPerPage) - recordsPerPage }, { $limit: recordsPerPage }],
                     },
                 },
-            ]);
+            ],
+            {
+                collation: {
+                    locale: 'en_US',
+                    strength: 1
+                }
+            });
 
             for await(const queryData of gamesCursor) {
                 //This assignment errors if the query returns no results, the array will be empty.

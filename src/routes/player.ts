@@ -218,10 +218,10 @@ router.patch('/changePassword', checkAuthorization, async (req, res, next) => {
     }
 });
 
-router.options('/logout');
-router.delete('/logout', checkAuthorization, async (req, res, next) => {
-    // await PlayerGateway.deletePlayer();
-});
+// router.options('/logout');
+// router.delete('/logout', checkAuthorization, async (req, res, next) => {
+//     await PlayerGateway.deletePlayer();
+// });
 
 router.options('/deleteAccount');
 router.delete('/deleteAccount', checkAuthorization, async (req, res, next) => {

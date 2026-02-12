@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/DestefanoHub/matching_game_server.git"
   },
-  "author": "",
+  "author": "Andrew De Stefano",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/DestefanoHub/matching_game_server/issues"

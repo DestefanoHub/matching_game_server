@@ -72,56 +72,31 @@ router.post('/createAccount', async (req, res, next) => {
     const username: string = req.body.username;
     const password: string = req.body.password;
     const confirmPassword: string = req.body.confirmPassword;
+    const errorSubCodes = [];
 
-    const usernameObj = {
-        value: username,
-        error: false,
-        message: ''
-    };
-    const passwordObj = {
-        value: password,
-        error: false,
-        message: ''
-    };
-    const confirmObj = {
-        value: confirmPassword,
-        error: false,
-        message: ''
-    };
-
-    if(usernameObj.value.length < 5) {
-        usernameObj.error = true;
-        usernameObj.message = 'Username too short.';
-    }else if(usernameObj.value.length > 30) {
-        usernameObj.error = true;
-        usernameObj.message = 'Username too long.';
+    if(username.length < 5 || username.length > 30) {
+        errorSubCodes.push(1);
     }
 
     try{
-        const usernameExists = await PlayerGateway.checkUsernameExists(usernameObj.value);
+        const usernameExists = await PlayerGateway.checkUsernameExists(username);
 
         if(usernameExists){
-            usernameObj.error = true;
-            usernameObj.message = 'Username unavailable.';
+            errorSubCodes.push(2);
         }
 
-        if(passwordObj.value.length < 12) {
-            passwordObj.error = true;
-            passwordObj.message = 'Password too short.';
-        }else if(passwordObj.value.length > 30) {
-            passwordObj.error = true;
-            passwordObj.message = 'Password too long.';
+        if(password.length < 12 || password.length > 30) {
+            errorSubCodes.push(3);
         }
         
-        if(confirmObj.value !== passwordObj.value) {
-            confirmObj.error = true;
-            confirmObj.message = 'Password does not match.';
+        if(confirmPassword !== password) {
+            errorSubCodes.push(4);
         }
 
-        if(usernameObj.error || passwordObj.error || confirmObj.error){
+        if(errorSubCodes.length){
             status = 400;
         }else{
-            const newPlayer = await PlayerGateway.insertPlayer(usernameObj.value, passwordObj.value);
+            const newPlayer = await PlayerGateway.insertPlayer(username, password);
             const token = generateToken(newPlayer._id, newPlayer.name);
             newPlayerCreds = {
                 ID: newPlayer._id,
@@ -131,11 +106,7 @@ router.post('/createAccount', async (req, res, next) => {
         }
 
         res.status(status).json([
-            {
-                usernameObj,
-                passwordObj,
-                confirmObj
-            },
+            errorSubCodes,
             newPlayerCreds
         ]);
     }catch(error){

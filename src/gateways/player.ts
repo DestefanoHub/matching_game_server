@@ -107,6 +107,11 @@ export default abstract class PlayerGateway {
 
             throw new Error("401", {cause: 'Invalid credentials.'});
         }catch(error){
+            //@ts-expect-error
+            if(error.message === '401'){
+                throw error;
+            }
+            
             throw new Error("400", {cause: error});
         }
     }

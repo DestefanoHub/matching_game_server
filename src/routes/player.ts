@@ -141,49 +141,30 @@ router.patch('/changePassword', checkAuthorization, async (req, res, next) => {
     let status = 200;
     const password: string = req.body.password;
     const confirmPassword: string = req.body.confirmPassword;
+    const errorSubCodes = [];
 
-    const passwordObj = {
-        value: password,
-        error: false,
-        message: ''
-    };
-    const confirmObj = {
-        value: confirmPassword,
-        error: false,
-        message: ''
-    };
-
-    if(passwordObj.value.length < 12) {
-        passwordObj.error = true;
-        passwordObj.message = 'Password too short.';
-    }else if(passwordObj.value.length > 30) {
-        passwordObj.error = true;
-        passwordObj.message = 'Password too long.';
+    if(password.length < 12 || password.length > 30) {
+        errorSubCodes.push(1);
     }
     
-    if(confirmObj.value !== passwordObj.value) {
-        confirmObj.error = true;
-        confirmObj.message = 'Password does not match.';
+    if(confirmPassword !== confirmPassword) {
+        errorSubCodes.push(3);
     }
 
     try{
-        const isPasswordSame = await PlayerGateway.checkPasswordsMatch(req.token!.id, passwordObj.value);
+        const isPasswordSame = await PlayerGateway.checkPasswordsMatch(req.token!.id, password);
 
         if(isPasswordSame){
-            passwordObj.error = true;
-            passwordObj.message = 'New password cannot be your current password.';
+            errorSubCodes.push(2);
         }
 
-        if(passwordObj.error || confirmObj.error){
+        if(errorSubCodes.length){
             status = 400;
         }else{
-            await PlayerGateway.changePassword(req.token!.id, passwordObj.value);
+            await PlayerGateway.changePassword(req.token!.id, password);
         }
 
-        res.status(status).json({
-            passwordObj,
-            confirmObj
-        });
+        res.status(status).json(errorSubCodes);
     }catch(error){
         next(error);
     }

@@ -61,7 +61,7 @@ export default abstract class GameGateway {
                 isFirstDiffGame: false,
                 isFirstDiffWin: false,
                 isFastestDiffTime: false
-            },
+            }
         };
 
         try{

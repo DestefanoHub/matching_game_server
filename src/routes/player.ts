@@ -147,7 +147,7 @@ router.patch('/changePassword', checkAuthorization, async (req, res, next) => {
         errorSubCodes.push(1);
     }
     
-    if(confirmPassword !== confirmPassword) {
+    if(password !== confirmPassword) {
         errorSubCodes.push(3);
     }
 

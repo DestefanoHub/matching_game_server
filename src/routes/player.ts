@@ -170,17 +170,12 @@ router.patch('/changePassword', checkAuthorization, async (req, res, next) => {
     }
 });
 
-// router.options('/logout');
-// router.delete('/logout', checkAuthorization, async (req, res, next) => {
-//     await PlayerGateway.deletePlayer();
-// });
-
 router.options('/deleteAccount');
 router.delete('/deleteAccount', checkAuthorization, async (req, res, next) => {
     try{
         await PlayerGateway.deletePlayer(req.token!.id);
 
-        res.status(200).end();
+        res.status(204).end();
     }catch(error){
         next(error);
     }

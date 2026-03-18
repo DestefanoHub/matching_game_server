@@ -19,10 +19,6 @@ const playerSchema = new Schema<Player>({
     salt: {
         type: String,
         required: true
-    },
-    JWT: {
-        type: String,
-        required: false
     }
 });
 

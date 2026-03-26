@@ -6,42 +6,42 @@ import { checkAuthorization, generateToken } from '../auth.js';
 
 const router = express.Router();
 
-router.get('/getPlayer/:playerID', async (req, res, next) => {
-    let playerData;
-    const playerID = req.params.playerID;
+// router.get('/getPlayer/:playerID', async (req, res, next) => {
+//     let playerData;
+//     const playerID = req.params.playerID;
 
-    if(!playerID){
-        throw new Error('400', {cause: 'No player ID provided.'});
-    }
+//     if(!playerID){
+//         throw new Error('400', {cause: 'No player ID provided.'});
+//     }
 
-    try{
-        playerData = await PlayerGateway.getPlayerByID(playerID);
-        res.status(200).json(playerData);
-    }catch(error){
-        next(error);
-    }
-});
+//     try{
+//         playerData = await PlayerGateway.getPlayerByID(playerID);
+//         res.status(200).json(playerData);
+//     }catch(error){
+//         next(error);
+//     }
+// });
 
-router.get('/checkUsername/:username', async (req, res, next) => {
-    let status = 200;
-    const username = req.params.username;
+// router.get('/checkUsername/:username', async (req, res, next) => {
+//     let status = 200;
+//     const username = req.params.username;
 
-    if(!username){
-        throw new Error('400', {cause: 'No player ID provided.'});
-    }
+//     if(!username){
+//         throw new Error('400', {cause: 'No player ID provided.'});
+//     }
 
-    try{
-        const exists = await PlayerGateway.checkUsernameExists(username);
+//     try{
+//         const exists = await PlayerGateway.checkUsernameExists(username);
 
-        if(exists){
-            status = 409;
-        }
+//         if(exists){
+//             status = 409;
+//         }
 
-        res.status(status).end();
-    }catch(error){
-        next(error);
-    }
-});
+//         res.status(status).end();
+//     }catch(error){
+//         next(error);
+//     }
+// });
 
 // router.get('/searchPlayers/:player', async (req, res, next) => {
 //     let status = 200;

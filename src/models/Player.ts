@@ -19,6 +19,11 @@ const playerSchema = new Schema<Player>({
     salt: {
         type: String,
         required: true
+    },
+    deletedAt: {
+        type: Date,
+        required: false,
+        default: null
     }
 });
 

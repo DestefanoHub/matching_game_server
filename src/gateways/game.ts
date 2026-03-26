@@ -231,12 +231,13 @@ export default abstract class GameGateway {
             {
                 collation: {
                     locale: 'en_US',
-                    strength: 1
+                    strength: 1,
+                    caseLevel: false
                 }
             });
 
             for await(const queryData of gamesCursor) {
-                //This assignment errors if the query returns no results, the array will be empty.
+                //Need to check if the array is empty becuase this assignment errors if the query returns no results.
                 if(queryData.count.length){
                     gamesData.totalGames = queryData.count[0].totalCount;
                 }

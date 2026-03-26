@@ -1,4 +1,3 @@
-import { Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 
 import Player from '../models/Player.js';
@@ -24,7 +23,8 @@ export default abstract class PlayerGateway {
 
     public static async getPlayerByID(id: string): Promise<PlayerType> {
         try{
-            return await Player.findById(id).lean<PlayerType>().exec() as PlayerType;
+            //Only retrieve players that are not deleted.
+            return await Player.findOne({_id: id, deletedAt: null}).lean<PlayerType>().exec() as PlayerType;
         }catch(error){
             throw new Error("404", {cause: error});
         }
@@ -40,7 +40,11 @@ export default abstract class PlayerGateway {
             //     }
             // ]);
             // console.log(foundPlayer);
-            return await Player.find({name: username.trim()}).countDocuments();
+            /*
+            * This should check all usernames, not just for active players.
+            * Need to use the collation method as you can't pass collation as options to the find method.
+            */
+            return await Player.find({name: username.trim()}).collation({locale: 'en_US', strength: 1, caseLevel: false}).countDocuments();
         }catch(error){
             throw new Error("400", {cause: error});
         }
@@ -76,7 +80,7 @@ export default abstract class PlayerGateway {
 
     public static async deletePlayer(id: string): Promise<void> {
         try{
-            await Player.deleteOne({_id: id});
+            await Player.findByIdAndUpdate(id, {deletedAt: new Date()});
         }catch(error){
             throw new Error("404", {cause: error});
         }
@@ -95,7 +99,7 @@ export default abstract class PlayerGateway {
 
     public static async login(name: string, password: string): Promise<PlayerType> {
         try{
-            const player = await Player.findOne({name}).lean<PlayerType>().exec();
+            const player = await Player.findOne({name, deletedAt: null}).lean<PlayerType>().exec();
 
             if(player !== null){
                 const isValid = await bcrypt.compare(password, player.password!);

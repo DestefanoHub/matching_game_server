@@ -1,4 +1,4 @@
-import mongoose, { Types } from 'mongoose';
+import mongoose, { Types, type Date } from 'mongoose';
 
 export type SortBy = 'sa'|'sd'|'da'|'dd';
 
@@ -34,7 +34,7 @@ export interface Player extends mongoose.Document {
     name: string,
     password?: string,
     salt?: string,
-    JWT?: string
+    deletedAt?: Date
 };
 
 export type GamePlayer = {

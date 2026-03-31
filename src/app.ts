@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import express, { type Request, type Response, type NextFunction } from 'express';
+import express, { type Request, type Response } from 'express';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -30,7 +30,7 @@ app.use(bodyParser.json());
 app.use('/game', GameRouter);
 app.use('/player', PlayerRouter);
 
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((error: Error, req: Request, res: Response) => {
     let errorCode = 500;
 
     console.log(error.cause);

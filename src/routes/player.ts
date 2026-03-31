@@ -116,8 +116,7 @@ router.post('/createAccount', async (req, res, next) => {
 
 router.options('/login');
 router.post('/login', async (req, res, next) => {
-    let status = 201;
-    let userCreds = null;
+    let userCreds;
     const username: string = req.body.username;
     const password: string = req.body.password;
     
@@ -130,7 +129,7 @@ router.post('/login', async (req, res, next) => {
             JWT: token
         };
 
-        res.status(status).json(userCreds);
+        res.status(201).json(userCreds);
     }catch(error){
         next(error);
     }

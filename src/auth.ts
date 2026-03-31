@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import jwt, { type JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import type { Types } from 'mongoose';
 
 import jwtSecret from '../jwt-secret.json' with {type: 'json'};

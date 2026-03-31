@@ -157,7 +157,7 @@ export default abstract class GameGateway {
         };
         const recordsPerPage = 10;
         let whereParams: WhereParams = {};
-        let sortParams: SortParams = {sort: {}};
+        const sortParams: SortParams = {sort: {}};
 
         //optional player search
         if(playerName !== null){

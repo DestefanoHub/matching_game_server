@@ -1,6 +1,6 @@
-import { Types } from 'mongoose';
+import { Types, type HydratedDocument } from 'mongoose';
 
-import Game from '../models/Game.js';
+import { Game } from '../models/Game.js';
 import type { Game as GameType, Difficulty, SortBy, WinLoss, GamePlayer } from '../types.js';
 
 type SortParams = {
@@ -36,7 +36,7 @@ type MultiGamesData = {
 
 export default abstract class GameGateway {    
     public static async insertGame(player: GamePlayer, difficulty: Difficulty, hasWon: boolean, points: number, totalPoints: number, time: number): Promise<GameType> {
-        const game = new Game({
+        const game: HydratedDocument<GameType> = new Game({
             player,
             difficulty,
             hasWon,

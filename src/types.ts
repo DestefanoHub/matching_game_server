@@ -1,4 +1,4 @@
-import mongoose, { Types, type Date } from 'mongoose';
+import { Types, type Date } from 'mongoose';
 
 export type SortBy = 'sa'|'sd'|'da'|'dd';
 
@@ -18,7 +18,7 @@ export function isDifficultyType(value: unknown): value is Difficulty {
     return [0, 1, 2, 3].includes(value as number);
 }
 
-export interface Game extends mongoose.Document {
+export type Game = {
     _id: Types.ObjectId,
     date?: Date,
     player: GamePlayer,
@@ -29,7 +29,7 @@ export interface Game extends mongoose.Document {
     time: number
 };
 
-export interface Player extends mongoose.Document {
+export type Player = {
     _id: Types.ObjectId,
     name: string,
     password?: string,

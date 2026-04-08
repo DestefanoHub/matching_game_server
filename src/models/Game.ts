@@ -43,9 +43,7 @@ const gameSchema = new Schema<GameType>({
         min: 0,
         max: 60,
         required: true
-    },
+    }
 });
 
-interface GameModel extends mongoose.Model<GameType>{};
-
-export default mongoose.model<GameType, GameModel>('Game', gameSchema);
+export const Game = mongoose.model<GameType>('Game', gameSchema);

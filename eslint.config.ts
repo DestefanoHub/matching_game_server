@@ -21,15 +21,6 @@ export default defineConfig([
       'no-duplicate-imports': 'error',
       'no-self-compare': 'error',
       'no-template-curly-in-string': 'error',
-      'no-use-before-define': ['warn', {
-        'functions': false,
-        'classes': true,
-        'variables': true,
-        'allowNamedExports': true,
-        'enums': true,
-        'typedefs': true,
-        'ignoreTypeReferences': true
-      }],
       'arrow-body-style': ['error', 'as-needed'],
       'block-scoped-var': 'error',
       'default-case': 'error',

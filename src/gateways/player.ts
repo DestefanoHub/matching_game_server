@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
 
-import Player from '../models/Player.js';
+import { Player } from '../models/Player.js';
 import type { Player as PlayerType } from '../types.js';
+import type { HydratedDocument } from 'mongoose';
 
 export default abstract class PlayerGateway {
     public static async insertPlayer(name: string, password: string): Promise<PlayerType> {
@@ -9,7 +10,7 @@ export default abstract class PlayerGateway {
             const salt = await bcrypt.genSalt();
             const hash = await bcrypt.hash(password, salt);
             
-            const player = new Player({
+            const player: HydratedDocument<PlayerType> = new Player({
                 name,
                 password: hash,
                 salt

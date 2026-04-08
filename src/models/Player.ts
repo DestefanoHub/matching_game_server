@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
-import type { Player } from '../types.js';
+import type { Player as PlayerType } from '../types.js';
 
 const Schema = mongoose.Schema;
-const playerSchema = new Schema<Player>({
+const playerSchema = new Schema<PlayerType>({
     name: {
         type: String,
         trim: true,
@@ -27,6 +27,4 @@ const playerSchema = new Schema<Player>({
     }
 });
 
-interface PlayerModel extends mongoose.Model<Player>{};
-
-export default mongoose.model<Player, PlayerModel>('Player', playerSchema);
+export const Player = mongoose.model<PlayerType>('Player', playerSchema);

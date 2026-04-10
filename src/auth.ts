@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { type JwtPayload } from 'jsonwebtoken';
 import type { Types } from 'mongoose';
 
 import jwtSecret from '../jwt-secret.json' with {type: 'json'};
@@ -22,10 +22,10 @@ export function checkAuthorization(req: Request, res: Response, next: NextFuncti
             algorithms: ['HS512'],
             issuer: 'Matching Game Server',
             subject: 'Authorization token',
-        });
+        }) as JwtPayload;
 
         if(typeof authorized === 'object'){
-            // @ts-expect-error
+            
             req.token = authorized;
         }else{
             return res.sendStatus(401);
@@ -44,6 +44,11 @@ export function generateToken(playerID: Types.ObjectId, username: string): strin
         subject: 'Authorization token',
         expiresIn: '24h'
     });
+}
+
+interface myToken extends JwtPayload {
+    id: string,
+    username: string
 }
 
 // function isJWT(value: unknown): value is JwtPayload{

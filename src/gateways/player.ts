@@ -111,7 +111,7 @@ export default abstract class PlayerGateway {
                 }
             }
 
-            throw new Error("401", {cause: 'Invalid credentials.'});
+            throw new Error('401', {cause: 'Invalid credentials.'});
         }catch(error){
             if(error instanceof Error && error.message === '401'){
                 throw error;

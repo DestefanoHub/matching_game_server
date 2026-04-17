@@ -1,8 +1,12 @@
 import mongoose from 'mongoose';
-import express, { type Request, type Response } from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
 import cors from 'cors';
+import fs from 'fs/promises';
+import path from 'path';
+import os from 'os';
+// import winston from 'winston';
 
 import GameRouter from './routes/game.js';
 import PlayerRouter from './routes/player.js';
@@ -30,13 +34,41 @@ app.use(bodyParser.json());
 app.use('/game', GameRouter);
 app.use('/player', PlayerRouter);
 
-app.use((error: Error, req: Request, res: Response) => {
-    let errorCode = 500;
+type serverError = {
+    timestamp: Date,
+    code: number,
+    reason: string
+};
 
-    console.log(error.cause);
+// eslint-disable-next-line no-unused-vars
+app.use(async (error: Error, req: Request, res: Response, next: NextFunction) => {
+    const logFileName = new Date().toISOString().split('T')[0];
+    const filePath = path.join(`${import.meta.dirname}/../logs/${logFileName}.txt`);
+    // const logger = winston.createLogger({
+    //     level: 'error',
+    //     format: winston.format.combine(
+    //         winston.format.errors({stack: true}),
+    //         winston.format.timestamp(),
+    //         winston.format.json()
+    //     )
+    // });
+    let errorCode = 500;
 
     if(!Number.isNaN(error.message)){
         errorCode = +error.message;
+    }
+
+    const errorData: serverError = {
+        timestamp: new Date(),
+        code: errorCode,
+        reason: (error.cause instanceof Error) ? error.cause.toString() : error.cause as string
+    };
+
+    try{
+        await fs.appendFile(filePath, `${JSON.stringify(errorData)}${os.EOL}`, 'utf8');
+    }catch(error){
+        console.log('Failed to write error to log file');
+        console.log(error);
     }
 
     res.status(errorCode).end();

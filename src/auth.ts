@@ -45,20 +45,3 @@ export function generateToken(playerID: Types.ObjectId, username: string): strin
         expiresIn: '24h'
     });
 }
-
-interface myToken extends JwtPayload {
-    id: string,
-    username: string
-}
-
-// function isJWT(value: unknown): value is JwtPayload{
-//     return (typeof value == 'object' &&
-//         value !== null &&
-//         typeof value.exp == 'number' &&
-//         typeof value.iat == 'number' &&
-//         typeof value.ID == 'string' &&
-//         typeof value.iss == 'string' &&
-//         typeof value.sub == 'string' &&
-//         typeof value.username == 'string'
-//     );
-// }

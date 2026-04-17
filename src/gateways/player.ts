@@ -44,6 +44,7 @@ export default abstract class PlayerGateway {
             /*
             * This should check all usernames, not just for active players.
             * Need to use the collation method as you can't pass collation as options to the find method.
+            * The collation makes the search case-insensitive.
             */
             return await Player.find({name: username.trim()}).collation({locale: 'en_US', strength: 1, caseLevel: false}).countDocuments();
         }catch(error){
@@ -112,8 +113,7 @@ export default abstract class PlayerGateway {
 
             throw new Error("401", {cause: 'Invalid credentials.'});
         }catch(error){
-            //@ts-expect-error
-            if(error.message === '401'){
+            if(error instanceof Error && error.message === '401'){
                 throw error;
             }
             

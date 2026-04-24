@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { type Request } from 'express';
 
 import GameGateway  from '../gateways/game.js';
 import { checkAuthorization } from '../auth.js';
@@ -49,7 +49,11 @@ router.get('/getGames', async (req, res, next) => {
     }
 });
 
-router.get('/getRecentGames/:playerID?', async (req, res, next) => {
+type recentGamesParams = {
+    playerID?: string
+};
+
+router.get('/getRecentGames/:playerID?', async (req: Request<recentGamesParams>, res, next) => {
     let status = 200;
     let recentGames;
     const playerID = (req.params.playerID) ? req.params.playerID : null;

@@ -135,3 +135,4 @@ matching_game_server.code-workspace
 mongodb-credentials.json
 jwt-secret.json
 dist
+logs

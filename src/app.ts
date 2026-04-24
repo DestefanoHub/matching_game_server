@@ -6,7 +6,6 @@ import cors from 'cors';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-// import winston from 'winston';
 
 import GameRouter from './routes/game.js';
 import PlayerRouter from './routes/player.js';
@@ -40,18 +39,15 @@ type serverError = {
     reason: string
 };
 
-// eslint-disable-next-line no-unused-vars
+/*
+* The function throws an eslint no-unused-vars error for the next parameter.
+* The next parameter is required for an Express error handler.
+* Disabling the specific rule did not work, probably because it is part of one of the recommended extensions.
+*/
+// eslint-disable-next-line
 app.use(async (error: Error, req: Request, res: Response, next: NextFunction) => {
     const logFileName = new Date().toISOString().split('T')[0];
     const filePath = path.join(`${import.meta.dirname}/../logs/${logFileName}.txt`);
-    // const logger = winston.createLogger({
-    //     level: 'error',
-    //     format: winston.format.combine(
-    //         winston.format.errors({stack: true}),
-    //         winston.format.timestamp(),
-    //         winston.format.json()
-    //     )
-    // });
     let errorCode = 500;
 
     if(!Number.isNaN(error.message)){

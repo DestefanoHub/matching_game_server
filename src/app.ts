@@ -14,7 +14,6 @@ import mongodbCreds from '../mongodb-credentials.json' with {type: 'json'};
 const mongoDBURL = `mongodb+srv://${mongodbCreds.username}:${mongodbCreds.password}@matching-game.052nx.mongodb.net/matching-game?retryWrites=true&w=majority&appName=Matching-Game`;
 
 const app = express();
-const port = 3100;
 
 app.use(helmet({
     strictTransportSecurity: false,
@@ -72,7 +71,8 @@ app.use(async (error: Error, req: Request, res: Response, next: NextFunction) =>
 
 try{
     mongoose.connect(mongoDBURL);
-    app.listen(port);
 }catch(error){
     console.log(error);
 }
+
+export default app;

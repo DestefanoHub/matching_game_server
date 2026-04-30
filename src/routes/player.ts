@@ -121,6 +121,10 @@ router.post('/login', async (req, res, next) => {
     const password: string = req.body.password;
     
     try{
+        if((typeof username === 'undefined' || !username.length) || (typeof password === 'undefined' || !password.length)){
+            res.status(401).end();
+        }
+
         const userData = await PlayerGateway.login(username, password);
         const token = generateToken(userData._id, userData.name);
         userCreds = {

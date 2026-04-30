@@ -22,7 +22,7 @@ export default abstract class PlayerGateway {
         }
     }
 
-    public static async getPlayerByID(id: string): Promise<PlayerType> {
+    private static async getPlayerByID(id: string): Promise<PlayerType> {
         try{
             //Only retrieve players that are not deleted.
             return await Player.findOne({_id: id, deletedAt: null}).lean<PlayerType>().exec() as PlayerType;

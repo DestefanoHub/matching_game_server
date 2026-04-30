@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'logs']),
   { 
     files: ["**/*.ts"],
     plugins: { js },
@@ -13,7 +13,10 @@ export default defineConfig([
       tseslint.configs.recommended
     ],
     languageOptions: { 
-      globals: globals.node 
+      globals: {
+        ...globals.node,
+        ...globals.jest
+      }
     },
     rules: {
       'array-callback-return': 'error',

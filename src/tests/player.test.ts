@@ -1,10 +1,22 @@
-import { describe, test, expect, afterAll } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
-import mongoose from 'mongoose';
 
 import app from '../app.js';
+import { initPlayers } from '../database-config.js';
 
-describe('Login operations', () => {
+// beforeAll(async () => {
+//     await initDBConn();
+// });
+
+// afterAll(async () => {
+//     await closeDBConn();
+// });
+
+// beforeAll(async () => {
+//     await initPlayers();
+// });
+
+describe('Login operations', () => {    
     test('player has successfully logged in', async () => {
         const payload = {
             username: 'Andrew',
@@ -166,8 +178,4 @@ describe('Login operations', () => {
         expect(response.status).toBe(401);
         expect(response.body).toEqual({});
     });
-});
-
-afterAll(async () => {
-    await mongoose.connection.close();
 });

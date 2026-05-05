@@ -1,27 +1,26 @@
 import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 
-import app from '../app.js';
-import { initPlayers } from '../database-config.js';
+import app from '../../app.js';
+import { initPlayers, destroyPlayers } from '../../database-config.js';
+import { Player } from '../../models/Player.js';
 
-// beforeAll(async () => {
-//     await initDBConn();
-// });
+beforeAll(async () => {
+    await initPlayers();
+});
 
-// afterAll(async () => {
-//     await closeDBConn();
-// });
-
-// beforeAll(async () => {
-//     await initPlayers();
-// });
+afterAll(async () => {
+    await destroyPlayers();
+});
 
 describe('Login operations', () => {    
     test('player has successfully logged in', async () => {
         const payload = {
-            username: 'Andrew',
-            password: 'MGAcctPass0!'
+            username: 'tester1',
+            password: 'password1234'
         };
+
+        const dbPlayer = await Player.findOne({name: payload.username}).exec();
         
         const response = await request(app).post('/player/login')
             .send(payload)
@@ -30,16 +29,16 @@ describe('Login operations', () => {
         expect(response.status).toBe(201);
         expect(response.headers['content-type']).toMatch(/(application\/json)/);
         expect(Object.hasOwn(response.body, 'ID')).toBeTruthy();
-        expect(response.body.ID).toBe('6914e7e18bb180a0e191a995');
+        expect(response.body.ID).toBe(dbPlayer!.id);
         expect(Object.hasOwn(response.body, 'username')).toBeTruthy();
-        expect(response.body.username).toBe('Andrew');
+        expect(response.body.username).toBe('tester1');
         expect(Object.hasOwn(response.body, 'JWT')).toBeTruthy();
     });
 
     test('player has failed logged in: incorrect username, correct password', async () => {
         const payload = {
             username: 'peepeepoopoo',
-            password: 'MGAcctPass0!'
+            password: 'wrongpassword'
         };
         
         const response = await request(app).post('/player/login')
@@ -52,8 +51,8 @@ describe('Login operations', () => {
 
     test('player has failed logged in: incorrect username wrong case, correct password', async () => {
         const payload = {
-            username: 'AnDrEw',
-            password: 'MGAcctPass0!'
+            username: 'TeStEr1',
+            password: 'wrongpassword'
         };
         
         const response = await request(app).post('/player/login')
@@ -66,8 +65,8 @@ describe('Login operations', () => {
 
     test('player has failed logged in: correct username, incorrect password wrong case', async () => {
         const payload = {
-            username: 'Andrew',
-            password: 'mgacctpass0!'
+            username: 'tester1',
+            password: 'WrOnGpAsSwOrD'
         };
         
         const response = await request(app).post('/player/login')
@@ -80,8 +79,8 @@ describe('Login operations', () => {
 
     test('player has failed logged in: correct username, incorrect password', async () => {
         const payload = {
-            username: 'Andrew',
-            password: 'peepeepoopoo!'
+            username: 'tester1',
+            password: 'wrongpassword'
         };
         
         const response = await request(app).post('/player/login')
@@ -109,7 +108,7 @@ describe('Login operations', () => {
     test('player has failed logged in: blank username', async () => {
         const payload = {
             username: '',
-            password: 'peepeepoopoo!'
+            password: 'password1234'
         };
         
         const response = await request(app).post('/player/login')
@@ -122,7 +121,7 @@ describe('Login operations', () => {
 
     test('player has failed logged in: blank password', async () => {
         const payload = {
-            username: 'Andrew',
+            username: 'tester1',
             password: ''
         };
         
@@ -136,7 +135,7 @@ describe('Login operations', () => {
 
     test('player has failed logged in: no username', async () => {
         const payload = {
-            password: 'peepeepoopoo!'
+            password: 'password1234'
         };
         
         const response = await request(app).post('/player/login')
@@ -149,7 +148,7 @@ describe('Login operations', () => {
 
     test('player has failed logged in: no password', async () => {
         const payload = {
-            username: 'Andrew'
+            username: 'tester1'
         };
         
         const response = await request(app).post('/player/login')

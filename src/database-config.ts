@@ -3,7 +3,6 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import bcrypt from 'bcrypt';
 
 import { Player } from './models/Player.js';
-import type { Player as PlayerType } from './types.js';
 
 let dbServer: MongoMemoryServer;
 
@@ -40,4 +39,8 @@ export async function initPlayers(){
     }
 
     await Player.insertMany(players);
+}
+
+export async function destroyPlayers(){
+    await mongoose.connection.dropCollection('players');
 }

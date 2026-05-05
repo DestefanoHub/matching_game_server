@@ -35,7 +35,7 @@ app.use('/game', GameRouter);
 app.use('/player', PlayerRouter);
 
 type serverError = {
-    timestamp: Date,
+    timestamp: string,
     code: number,
     reason: string
 };
@@ -47,7 +47,7 @@ type serverError = {
 */
 // eslint-disable-next-line
 app.use(async (error: Error, req: Request, res: Response, next: NextFunction) => {
-    const logFileName = new Date().toISOString().split('T')[0];
+    const logFileName = Date().split('T')[0];
     const filePath = path.join(`${import.meta.dirname}/../logs/${logFileName}.txt`);
     let errorCode = 500;
 
@@ -56,7 +56,7 @@ app.use(async (error: Error, req: Request, res: Response, next: NextFunction) =>
     }
 
     const errorData: serverError = {
-        timestamp: new Date(),
+        timestamp: Date(),
         code: errorCode,
         reason: (error.cause instanceof Error) ? error.cause.toString() : error.cause as string
     };

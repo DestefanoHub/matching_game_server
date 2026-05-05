@@ -5,9 +5,12 @@ import type { Game as GameType, GamePlayer } from '../types.js';
 const Schema = mongoose.Schema;
 
 const gamePlayerSchema = new Schema<GamePlayer>({
-    pid: String,
+    pid: {
+        type: String,
+        index: 1
+    },
     username: String
-});
+}, { _id: false });
 
 const gameSchema = new Schema<GameType>({
     player: {
@@ -45,5 +48,7 @@ const gameSchema = new Schema<GameType>({
         required: true
     }
 });
+
+gameSchema.index({'player.username': 1}, {collation: {locale: 'en_US', strength: 1, caseLevel: false}});
 
 export const Game = mongoose.model<GameType>('Game', gameSchema);

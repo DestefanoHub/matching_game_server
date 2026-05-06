@@ -1,4 +1,4 @@
-import mongoose, { type HydratedDocument } from 'mongoose';
+import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import bcrypt from 'bcrypt';
 

@@ -1,27 +1,34 @@
 import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 
-import { initPlayers, destroyPlayers } from '../../database-config.js';
+import { initDBConn, initPlayers, destroyPlayers, closeDBConn } from '../../database-config.js';
 import { Player } from '../../models/Player.js';
 import PlayerGateway from '../../gateways/player.js';
 
 beforeAll(async () => {
-    await initPlayers();
+    await initDBConn();
 });
 
 afterAll(async () => {
-    await destroyPlayers();
+    await closeDBConn();
 });
 
 describe('Gateway Login operations', () => {    
+    beforeAll(async () => {
+        await initPlayers();
+    });
+
+    afterAll(async () => {
+        await destroyPlayers();
+    });
+    
     test('player has successfully logged in', async () => {
         const username = 'tester1';
         const password = 'password1234';
 
         const dbPlayer = await Player.findOne({name: username}).exec();
-        
         const player = await PlayerGateway.login(username, password);
 
-        expect(player._id).toBe(dbPlayer!.id);
+        expect(player._id.toString()).toBe(dbPlayer!.id);
         expect(player.name).toBe(dbPlayer!.name);
         expect(Object.hasOwn(player, 'password')).toBeTruthy();
         expect(player.password).toBe(dbPlayer!.password);
@@ -31,111 +38,35 @@ describe('Gateway Login operations', () => {
         expect(player.deletedAt).toBeNull();
     });
 
-    test('player has failed logged in: incorrect username, correct password', async () => {
-        const username = 'peepeepoopoo';
-        const password = 'wrongpassword';
-        
-        expect(async () => {await PlayerGateway.login(username, password)}).toThrow(/401/);
+    test('player has failed logged in: incorrect username, correct password', async () => {        
+        await expect(PlayerGateway.login('peepeepoopoo', 'password1234')).rejects.toThrow(/401/);
     });
 
     test('player has failed logged in: incorrect username wrong case, correct password', async () => {
-        const username = 'TeStEr1';
-        const password = 'wrongpassword';
-        
-        expect(async () => {await PlayerGateway.login(username, password)}).toThrow(/401/);
+        await expect(PlayerGateway.login('TeStEr1', 'password1234')).rejects.toThrow(/401/);
     });
 
-    test('player has failed logged in: correct username, incorrect password wrong case', async () => {
-        const username = 'tester1';
-        const password = 'WrOnGpAsSwOrD';
-        
-        expect(async () => {await PlayerGateway.login(username, password)}).toThrow(/401/);
+    test('player has failed logged in: correct username, incorrect password wrong case', async () => {        
+        await expect(PlayerGateway.login('tester1', 'PaSsWoRd1234')).rejects.toThrow(/401/);
     });
-/*
+
     test('player has failed logged in: correct username, incorrect password', async () => {
-        const payload = {
-            username: 'tester1',
-            password: 'wrongpassword'
-        };
-        
-        const player = await PlayerGateway.login(username, password);
-
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual({});
+        await expect(PlayerGateway.login('tester1', 'wrongpassword')).rejects.toThrow(/401/);
     });
 
     test('player has failed logged in: user does not exist', async () => {
-        const payload = {
-            username: 'smellyfart',
-            password: 'peepeepoopoo'
-        };
-        
-        const player = await PlayerGateway.login(username, password);
-
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual({});
+        await expect(PlayerGateway.login('smellyfart', 'peepeepoopoo')).rejects.toThrow(/401/);
     });
 
     test('player has failed logged in: blank username', async () => {
-        const payload = {
-            username: '',
-            password: 'password1234'
-        };
-        
-        const player = await PlayerGateway.login(username, password);
-
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual({});
+        await expect(PlayerGateway.login('', 'password1234')).rejects.toThrow(/401/);
     });
 
     test('player has failed logged in: blank password', async () => {
-        const payload = {
-            username: 'tester1',
-            password: ''
-        };
-        
-        const player = await PlayerGateway.login(username, password);
-
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual({});
+        await expect(PlayerGateway.login('tester1', '')).rejects.toThrow(/401/);
     });
 
-    test('player has failed logged in: no username', async () => {
-        const payload = {
-            password: 'password1234'
-        };
-        
-        const player = await PlayerGateway.login(username, password);
-
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual({});
+    test('player has failed logged in: blank username and password', async () => {
+        await expect(PlayerGateway.login('', '')).rejects.toThrow(/401/);
     });
-
-    test('player has failed logged in: no password', async () => {
-        const payload = {
-            username: 'tester1'
-        };
-        
-        const player = await PlayerGateway.login(username, password);
-
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual({});
-    });
-
-    test('player has failed logged in: empty body', async () => {
-        const payload = {};
-        
-        const player = await PlayerGateway.login(username, password);
-
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual({});
-    });
-
-    test('player has failed logged in: no body', async () => {
-        const player = await PlayerGateway.login(username, password);
-
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual({});
-    });
-    */
 });

@@ -1,20 +1,15 @@
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import bcrypt from 'bcrypt';
 
-import { Player } from './models/Player.js';
-
-let dbServer: MongoMemoryServer;
+import { Player } from '../models/Player.js';
 
 export async function initDBConn(){
-    dbServer = await MongoMemoryServer.create();
-    mongoose.connect(dbServer.getUri(), {dbName: 'matching-game-test'});
+    mongoose.connect(process.env.MONGO_URL as string);
 }
 
 export async function closeDBConn(){
     await mongoose.connection.db!.dropDatabase();
     await mongoose.disconnect();
-    await dbServer.stop();
 }
 
 type TestPlayer = {

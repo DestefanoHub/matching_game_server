@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 
 import app from '../../app.js';
-import { initPlayers, destroyPlayers } from '../../database-config.js';
+import { initPlayers, destroyPlayers } from '../database-config.js';
 import { Player } from '../../models/Player.js';
 
 beforeAll(async () => {

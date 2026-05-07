@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 
-import { initDBConn, initPlayers, destroyPlayers, closeDBConn } from '../../database-config.js';
+import { initDBConn, initPlayers, destroyPlayers, closeDBConn } from '../database-config.js';
 import { Player } from '../../models/Player.js';
 import PlayerGateway from '../../gateways/player.js';
 

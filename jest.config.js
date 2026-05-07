@@ -4,8 +4,8 @@ const tsJestTransformCfg = createDefaultPreset().transform;
 
 /** @type {import("jest").Config} **/
 export default {
-  preset: 'ts-jest/presets/default-esm',
-  testEnvironment: "node",
+  preset: '@shelf/jest-mongodb',
+  extensionsToTreatAsEsm: ['.ts'],
   transform: {
     ...tsJestTransformCfg,
   },
@@ -17,5 +17,6 @@ export default {
     "<rootDir>/dist/",
     "<rootDir>/logs/"
   ],
-  roots: ["<rootDir>/src/"]
+  roots: ["<rootDir>/src/"],
+  watchPathIgnorePatterns: ['globalConfig']
 };

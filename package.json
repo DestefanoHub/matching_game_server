@@ -28,11 +28,11 @@
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^7.1.1",
     "mongoose": "^8.12.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@shelf/jest-mongodb": "^6.0.2",
     "@types/bcrypt": "^6.0.0",
     "@types/body-parser": "^1.19.6",
     "@types/cors": "^2.8.19",
@@ -44,6 +44,7 @@
     "globals": "^17.4.0",
     "jest": "^30.3.0",
     "jiti": "^2.6.1",
+    "mongodb": "^7.2.0",
     "mongodb-memory-server": "^11.1.0",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.9",

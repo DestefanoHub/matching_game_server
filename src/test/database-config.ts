@@ -1,22 +1,31 @@
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import bcrypt from 'bcrypt';
 
 import { Player } from '../models/Player.js';
-
-export async function initDBConn(){
-    mongoose.connect(process.env.MONGO_URL as string);
-}
-
-export async function closeDBConn(){
-    await mongoose.connection.db!.dropDatabase();
-    await mongoose.disconnect();
-}
 
 type TestPlayer = {
     name: string,
     password: string,
     salt?: string,
     deletedAt?: Date
+}
+
+let mongoServer: MongoMemoryServer;
+
+export async function initDB(){
+    mongoServer = await MongoMemoryServer.create({
+        binary: {
+            version: '7.1.1'
+        }
+    });
+    const uri = mongoServer.getUri();
+    await mongoose.connect(uri);
+}
+
+export async function closeDB(){
+    await mongoose.disconnect();
+    await mongoServer.stop();
 }
 
 export async function initPlayers(){

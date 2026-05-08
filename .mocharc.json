@@ -1,0 +1,9 @@
+{
+  "node-option": [
+    "import=tsx"
+  ],
+  "extension": ["ts"],
+  "spec": "src/test/**/*.test.ts",
+  "require": "src/test/global-setup.js",
+  "timeout": 100000
+}

@@ -7,7 +7,8 @@ This project is the back-end of the matching game. It is created with:
 - MongoDB
 - Mongoose
 - ESLint
-- Jest
+- Mocha
+- Chai
 
 This should be started before the `matching-game` project, although that can run without the server, it just won't do very much.
 
@@ -27,7 +28,7 @@ This should be started before the `matching-game` project, although that can run
 
 `/types` contains an extension to the Express `Request` interface to define the auth token, if present.
 
-`/tests` contains Jest test suites and test database configuration files.
+`/test` contains Jest test suites and test database configuration files.
 
 ## App usage
 

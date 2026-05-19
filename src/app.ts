@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import express, { type Request, type Response, type NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
@@ -9,9 +8,6 @@ import os from 'os';
 
 import GameRouter from './routes/game.js';
 import PlayerRouter from './routes/player.js';
-
-import mongodbCreds from '../mongodb-credentials.json' with {type: 'json'};
-const mongoDBURL = `mongodb+srv://${mongodbCreds.username}:${mongodbCreds.password}@matching-game.052nx.mongodb.net/matching-game?retryWrites=true&w=majority&appName=Matching-Game`;
 
 const app = express();
 
@@ -68,11 +64,5 @@ app.use(async (error: Error, req: Request, res: Response, next: NextFunction) =>
 
     res.status(errorCode).end();
 });
-
-try{
-    await mongoose.connect(mongoDBURL);
-}catch(error){
-    console.log(error);
-}
 
 export default app;

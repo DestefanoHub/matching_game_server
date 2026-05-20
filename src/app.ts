@@ -29,7 +29,7 @@ app.use('/game', GameRouter);
 app.use('/player', PlayerRouter);
 
 type serverError = {
-    timestamp: Date,
+    timestamp: string,
     code: number,
     reason: string
 };
@@ -50,7 +50,7 @@ app.use(async (error: Error, req: Request, res: Response, next: NextFunction) =>
     }
 
     const errorData: serverError = {
-        timestamp: new Date(),
+        timestamp: new Date().toLocaleString('en-US'),
         code: errorCode,
         reason: (error.cause instanceof Error) ? error.cause.toString() : error.cause as string
     };

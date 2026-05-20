@@ -10,7 +10,12 @@ const playerSchema = new Schema<PlayerType>({
         required: true,
         minlength: 5,
         maxlength: 30,
-        unique: true
+        unique: true,
+        collation: {
+            locale: 'en_US',
+            strength: 1,
+            caseLevel: false
+        }
     },
     password: {
         type: String,

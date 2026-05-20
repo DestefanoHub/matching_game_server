@@ -69,34 +69,38 @@ router.options('/createAccount');
 router.post('/createAccount', async (req, res, next) => {
     let status = 201;
     let newPlayerCreds = null;
-    const username: string = req.body.username;
-    const password: string = req.body.password;
-    const confirmPassword: string = req.body.confirmPassword;
+    const username: string | undefined = req.body.username;
+    const password: string | undefined = req.body.password;
+    const confirmPassword: string | undefined = req.body.confirmPassword;
     const errorSubCodes = [];
 
-    if(username.length < 5 || username.length > 30) {
+    if(typeof username === 'undefined' || (username.length < 5 || username.length > 30)) {
         errorSubCodes.push(1);
     }
 
     try{
-        const usernameExists = await PlayerGateway.checkUsernameExists(username);
+        let usernameExists = 0;
+        
+        if(!errorSubCodes.length){
+            usernameExists = await PlayerGateway.checkUsernameExists(username!);
+        }
 
         if(usernameExists){
             errorSubCodes.push(2);
         }
 
-        if(password.length < 12 || password.length > 30) {
+        if(typeof password === 'undefined' || (password.length < 12 || password.length > 30)) {
             errorSubCodes.push(3);
         }
         
-        if(confirmPassword !== password) {
+        if(typeof confirmPassword === 'undefined' || confirmPassword !== password) {
             errorSubCodes.push(4);
         }
 
         if(errorSubCodes.length){
             status = 400;
         }else{
-            const newPlayer = await PlayerGateway.insertPlayer(username, password);
+            const newPlayer = await PlayerGateway.insertPlayer(username!, password!);
             const token = generateToken(newPlayer._id, newPlayer.name);
             newPlayerCreds = {
                 ID: newPlayer._id,
@@ -117,15 +121,15 @@ router.post('/createAccount', async (req, res, next) => {
 router.options('/login');
 router.post('/login', async (req, res, next) => {
     let userCreds;
-    const username: string = req.body.username;
-    const password: string = req.body.password;
+    const username: string | undefined = req.body.username;
+    const password: string | undefined = req.body.password;
     
     try{
         if((typeof username === 'undefined' || !username.length) || (typeof password === 'undefined' || !password.length)){
             res.status(401).end();
         }
 
-        const userData = await PlayerGateway.login(username, password);
+        const userData = await PlayerGateway.login(username!, password!);
         const token = generateToken(userData._id, userData.name);
         userCreds = {
             ID: userData._id,

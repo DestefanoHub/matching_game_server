@@ -1,12 +1,16 @@
 import bcrypt from 'bcrypt';
+import type { HydratedDocument } from 'mongoose';
 
 import { Player } from '../models/Player.js';
 import type { Player as PlayerType } from '../types.js';
-import type { HydratedDocument } from 'mongoose';
 
 export default abstract class PlayerGateway {
     public static async insertPlayer(name: string, password: string): Promise<PlayerType> {
         try{
+            if(!(name.length && password.length)) {
+                throw new Error('400', {cause: 'Missing required fields.'});
+            }
+
             const salt = await bcrypt.genSalt();
             const hash = await bcrypt.hash(password, salt);
             
@@ -18,6 +22,10 @@ export default abstract class PlayerGateway {
 
             return await player.save();
         }catch(error){
+            if(error instanceof Error && error.message === '400'){
+                throw error;
+            }
+
             throw new Error("400", {cause: error});
         }
     }

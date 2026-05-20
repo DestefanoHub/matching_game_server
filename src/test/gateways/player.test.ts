@@ -1,4 +1,4 @@
-import { describe, test, before, beforeEach, after, afterEach } from 'mocha';
+import { describe, test, before, after } from 'mocha';
 import { expect, use as chaiUse } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
@@ -9,15 +9,15 @@ import PlayerGateway from '../../gateways/player.js';
 chaiUse(chaiAsPromised);
 
 describe('Gateway Insert Player operations', () => {
-    beforeEach(async () => {
+    before(async () => {
         await initPlayers();
     });
 
-    afterEach(async () => {
+    after(async () => {
         await destroyPlayers();
     });
 
-    test('successfully inserted player', async () => {
+    test('player insert successful', async () => {
         const player = await PlayerGateway.insertPlayer('tester3', 'password1234');
 
         expect(player).to.have.property('_id');
@@ -52,6 +52,10 @@ describe('Gateway Insert Player operations', () => {
         await expect(PlayerGateway.insertPlayer('tester1', 'password1234')).to.be.rejectedWith(/400/);
     });
 
+    test('player insert failed: duplicate username in different case', async () => {
+        await expect(PlayerGateway.insertPlayer('TeStEr1', 'password1234')).to.be.rejectedWith(/400/);
+    });
+
     test('player insert failed: duplicate username of deleted user', async () => {
         await expect(PlayerGateway.insertPlayer('tester2', 'password1234')).to.be.rejectedWith(/400/);
     });
@@ -66,7 +70,7 @@ describe('Gateway Login operations', () => {
         await destroyPlayers();
     });
     
-    test('player has successfully login', async () => {
+    test('player login successful', async () => {
         const username = 'tester1';
         const password = 'password1234';
 
@@ -83,39 +87,39 @@ describe('Gateway Login operations', () => {
         expect(player.deletedAt).to.be.null;
     });
 
-    test('player has failed login: incorrect username, correct password', async () => {        
+    test('login successful: incorrect username, correct password', async () => {        
         await expect(PlayerGateway.login('peepeepoopoo', 'password1234')).to.be.rejectedWith(/401/);
     });
 
-    test('player has failed login: incorrect username wrong case, correct password', async () => {
+    test('player login failed: incorrect username wrong case, correct password', async () => {
         await expect(PlayerGateway.login('TeStEr1', 'password1234')).to.be.rejectedWith(/401/);
     });
 
-    test('player has failed login: correct username, incorrect password wrong case', async () => {        
+    test('player login failed: correct username, incorrect password wrong case', async () => {        
         await expect(PlayerGateway.login('tester1', 'PaSsWoRd1234')).to.be.rejectedWith(/401/);
     });
 
-    test('player has failed login: correct username, incorrect password', async () => {
+    test('player login failed: correct username, incorrect password', async () => {
         await expect(PlayerGateway.login('tester1', 'wrongpassword')).to.be.rejectedWith(/401/);
     });
 
-    test('player has failed login: user does not exist', async () => {
+    test('player login failed: user does not exist', async () => {
         await expect(PlayerGateway.login('smellyfart', 'peepeepoopoo')).to.be.rejectedWith(/401/);
     });
 
-    test('player has failed login: blank username', async () => {
+    test('player login failed: blank username', async () => {
         await expect(PlayerGateway.login('', 'password1234')).to.be.rejectedWith(/401/);
     });
 
-    test('player has failed login: blank password', async () => {
+    test('player login failed: blank password', async () => {
         await expect(PlayerGateway.login('tester1', '')).to.be.rejectedWith(/401/);
     });
 
-    test('player has failed login: blank username and password', async () => {
+    test('player login failed: blank username and password', async () => {
         await expect(PlayerGateway.login('', '')).to.be.rejectedWith(/401/);
     });
 
-    test('player has failed login: account has deletedAt set', async () => {
+    test('player login failed: account has deletedAt set', async () => {
         await expect(PlayerGateway.login('tester2', 'password1234')).to.be.rejectedWith(/401/);
     });
 });

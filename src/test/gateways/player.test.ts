@@ -8,7 +8,7 @@ import PlayerGateway from '../../gateways/player.js';
 
 chaiUse(chaiAsPromised);
 
-describe('Gateway Insert Player operations', () => {
+describe('Player Gateway Insert Player operations', () => {
     before(async () => {
         await initPlayers();
     });
@@ -61,7 +61,152 @@ describe('Gateway Insert Player operations', () => {
     });
 });
 
-describe('Gateway Login operations', () => {    
+describe('Player Gateway Get Player By ID operations', () => {
+    before(async () => {
+        await initPlayers();
+    });
+
+    after(async () => {
+        await destroyPlayers();
+    });
+
+    test('player retrieval successful', async () => {
+        const dbPlayer = await Player.findOne({name: 'tester1'}).exec();
+        const player = await PlayerGateway.getPlayerByID(dbPlayer!.id);
+
+        expect(player._id.toString()).to.equal(dbPlayer!.id);
+        expect(player.name).to.equal(dbPlayer!.name);
+        expect(player).to.have.property('password');
+        expect(player.password).to.equal(dbPlayer!.password);
+        expect(player).to.have.property('salt');
+        expect(player.salt).to.equal(dbPlayer!.salt);
+        expect(player).to.have.property('deletedAt');
+        expect(player.deletedAt).to.be.null;
+    });
+
+    test('player retrieval failed: player has been deleted', async () => {
+        const dbPlayer = await Player.findOne({name: 'tester2'}).exec();
+        
+        await expect(PlayerGateway.getPlayerByID(dbPlayer!.id)).to.be.rejectedWith(/404/);
+    });
+
+    test('player retrieval failed: id does not exist but is a valid ObjectId (24 hex characters)', async () => {        
+        await expect(PlayerGateway.getPlayerByID('abcd1234abcd1234abcd1234')).to.be.rejectedWith(/404/);
+    });
+
+    test('player retrieval failed: id does not exist and is not valid ObjectId (24 hex characters)', async () => {        
+        await expect(PlayerGateway.getPlayerByID('abcd1234')).to.be.rejectedWith(/400/);
+    });
+
+    test('player retrieval failed: blank id', async () => {        
+        await expect(PlayerGateway.getPlayerByID('')).to.be.rejectedWith(/400/);
+    });
+});
+
+describe('Player Gateway Check Username Exists operations', () => {
+    before(async () => {
+        await initPlayers();
+    });
+
+    after(async () => {
+        await destroyPlayers();
+    });
+
+    test('player username does not exist (success)', async () => {
+        const uNameCount = await PlayerGateway.checkUsernameExists('fakeusername');
+
+        expect(uNameCount).to.equal(0);
+    });
+
+    test('player username exists (fail): username matches case', async () => {
+        const uNameCount = await PlayerGateway.checkUsernameExists('tester1');
+
+        expect(uNameCount).to.equal(1);
+    });
+
+    test('player username exists (fail): username in different case', async () => {
+        const uNameCount = await PlayerGateway.checkUsernameExists('TeStEr1');
+
+        expect(uNameCount).to.equal(1);
+    });
+
+    test('player username exists (fail): username matches case and user deleted', async () => {
+        const uNameCount = await PlayerGateway.checkUsernameExists('tester2');
+
+        expect(uNameCount).to.equal(1);
+    });
+
+    test('player username exists (fail): username in different case and user deleted', async () => {
+        const uNameCount = await PlayerGateway.checkUsernameExists('TeStEr2');
+
+        expect(uNameCount).to.equal(1);
+    });
+
+    test('player username blank (fail)', async () => {
+        await expect(PlayerGateway.checkUsernameExists('')).to.be.rejectedWith(/400/);
+    });
+});
+
+describe('Player Gateway Check Passwords Match operations', () => {
+    before(async () => {
+        await initPlayers();
+    });
+
+    after(async () => {
+        await destroyPlayers();
+    });
+
+    test('player passwords do not match (success): different passwords', async () => {
+        const dbPlayer = await Player.findOne({name: 'tester1'}).exec();
+        const pWordMatch = await PlayerGateway.checkPasswordsMatch(dbPlayer!.id, 'mynewpassword');
+
+        expect(pWordMatch).to.be.false;
+    });
+
+    test('player passwords do not match (success): passwords same but different case', async () => {
+        const dbPlayer = await Player.findOne({name: 'tester1'}).exec();
+        const pWordMatch = await PlayerGateway.checkPasswordsMatch(dbPlayer!.id, 'PaSsWoRd1234');
+
+        expect(pWordMatch).to.be.false;
+    });
+
+    test('player passwords match (fail): passwords same case', async () => {
+        const dbPlayer = await Player.findOne({name: 'tester1'}).exec();
+        const pWordMatch = await PlayerGateway.checkPasswordsMatch(dbPlayer!.id, 'password1234');
+
+        expect(pWordMatch).to.be.true;
+    });
+
+    test('player id does not exist (fail)', async () => {
+        await expect(PlayerGateway.checkPasswordsMatch('abcd1234', 'password1234')).to.be.rejectedWith(/404/);
+    });
+
+    test('player id blank (fail)', async () => {
+        await expect(PlayerGateway.checkPasswordsMatch('', 'password1234')).to.be.rejectedWith(/404/);
+    });
+});
+
+describe('Player Gateway Delete Player operations', () => {    
+    before(async () => {
+        await initPlayers();
+    });
+
+    after(async () => {
+        await destroyPlayers();
+    });
+});
+
+describe('Player Gateway Change Password operations', () => {    
+    before(async () => {
+        await initPlayers();
+    });
+
+    after(async () => {
+        await destroyPlayers();
+    });
+});
+
+describe('Player Gateway Login operations', () => {    
     before(async () => {
         await initPlayers();
     });

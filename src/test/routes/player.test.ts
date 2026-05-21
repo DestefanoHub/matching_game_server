@@ -17,7 +17,7 @@ after(() => {
 })
 
 
-describe('Server Insert Player operations', () => {
+describe('Server Create Player Account operations', () => {
     before(async () => {
         await initPlayers();
     });

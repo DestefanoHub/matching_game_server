@@ -30,32 +30,42 @@ export default abstract class PlayerGateway {
         }
     }
 
-    private static async getPlayerByID(id: string): Promise<PlayerType> {
+    public static async getPlayerByID(id: string): Promise<PlayerType> {
         try{
             //Only retrieve players that are not deleted.
-            return await Player.findOne({_id: id, deletedAt: null}).lean<PlayerType>().exec() as PlayerType;
+            const player: PlayerType | null = await Player.findOne({_id: id, deletedAt: null}).lean<PlayerType>().exec() as PlayerType;
+
+            if(player !== null) {
+                return player;
+            }
+
+            throw new Error('404', {cause: `Player with ID: ${id} does not exist`});
         }catch(error){
-            throw new Error("404", {cause: error});
+            if(error instanceof Error && error.message === '404'){
+                throw error;
+            }
+
+            throw new Error("400", {cause: error});
         }
     }
 
     public static async checkUsernameExists(username: string): Promise<number> {
         try{
-            // const foundPlayer = await Player.aggregate([
-            //     {
-            //         $addFields: {upperName: {$toUpper: '$name'}},
-            //         $match: {name: username},
-            //         $count: 'matching_users'
-            //     }
-            // ]);
-            // console.log(foundPlayer);
             /*
             * This should check all usernames, not just for active players.
             * Need to use the collation method as you can't pass collation as options to the find method.
             * The collation makes the search case-insensitive.
             */
-            return await Player.find({name: username.trim()}).collation({locale: 'en_US', strength: 1, caseLevel: false}).countDocuments();
+            if(username.trim().length !== 0){
+                return await Player.find({name: username.trim()}).collation({locale: 'en_US', strength: 1, caseLevel: false}).countDocuments();
+            }
+
+            throw new Error('400', {cause: `Username given for comparison is blank`});
         }catch(error){
+            if(error instanceof Error && error.message === '400'){
+                throw error;
+            }
+            
             throw new Error("400", {cause: error});
         }
     }

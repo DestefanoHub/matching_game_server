@@ -5,9 +5,13 @@ import { Player } from '../models/Player.js';
 import type { Player as PlayerType } from '../types.js';
 
 export default abstract class PlayerGateway {
+    /*
+    * Checks if the username and password are not blank.
+    * Does not check if the plaintext password meets any length requirement.
+    */
     public static async insertPlayer(name: string, password: string): Promise<PlayerType> {
         try{
-            if(!(name.length && password.length)) {
+            if(!(name.trim().length && password.trim().length)) {
                 throw new Error('400', {cause: 'Missing required fields.'});
             }
 
@@ -39,7 +43,7 @@ export default abstract class PlayerGateway {
                 return player;
             }
 
-            throw new Error('404', {cause: `Player with ID: ${id} does not exist`});
+            throw new Error('404', {cause: `Player with ID: ${id} does not exist.`});
         }catch(error){
             if(error instanceof Error && error.message === '404'){
                 throw error;
@@ -60,7 +64,7 @@ export default abstract class PlayerGateway {
                 return await Player.find({name: username.trim()}).collation({locale: 'en_US', strength: 1, caseLevel: false}).countDocuments();
             }
 
-            throw new Error('400', {cause: `Username given for comparison is blank`});
+            throw new Error('400', {cause: 'Username given for comparison is blank.'});
         }catch(error){
             if(error instanceof Error && error.message === '400'){
                 throw error;
@@ -98,25 +102,58 @@ export default abstract class PlayerGateway {
     //     }
     // }
 
+    /*
+    * Sets the deletedAt field to the current datetime.
+    * Does not work if the player is already deleted.
+    */
     public static async deletePlayer(id: string): Promise<void> {
         try{
-            await Player.findByIdAndUpdate(id, {deletedAt: new Date()});
+            const resultMeta = await Player.updateOne({_id: id, deletedAt: null}, {deletedAt: new Date()});
+
+            if(resultMeta.modifiedCount === 0){
+                throw new Error('404', {cause: 'Could not find user to delete.'});
+            }
         }catch(error){
-            throw new Error("404", {cause: error});
+            if(error instanceof Error && error.message === '404'){
+                throw error;
+            }
+            
+            throw new Error("400", {cause: error});
         }
     }
 
+    /*
+    * Does not check if the new password matches the old one. Need to call checkPasswordsMatch first if you
+    * want to check for that. However, it does generate a new salt so the hashes would be different.
+    * Does not work for deleted players.
+    * Checks if the password is not blank but does not check any length requirements.
+    */
     public static async changePassword(id: string, newPassword: string): Promise<void> {
         try{
+            if(!newPassword.trim().length) {
+                throw new Error('400', {cause: 'Missing password for update.'});
+            }
+            
             const salt = await bcrypt.genSalt();
             const hash = await bcrypt.hash(newPassword, salt);
 
-            await Player.updateOne({_id: id}, {password: hash, salt});
+            const resultMeta = await Player.updateOne({_id: id, deletedAt: null}, {password: hash, salt});
+
+            if(resultMeta.modifiedCount === 0){
+                throw new Error('404', {cause: 'Could not find user to update password.'});
+            }
         }catch(error){
-            throw new Error("404", {cause: error});
+            if(error instanceof Error && (error.message === '404' || error.message === '400')){
+                throw error;
+            }
+            
+            throw new Error("400", {cause: error});
         }
     }
 
+    /*
+    * Only works if the player is not deleted (i.e. - deletedAt is null).
+    */
     public static async login(name: string, password: string): Promise<PlayerType> {
         try{
             const player = await Player.findOne({name, deletedAt: null}).lean<PlayerType>().exec();

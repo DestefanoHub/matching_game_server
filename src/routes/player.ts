@@ -146,20 +146,20 @@ router.post('/login', async (req, res, next) => {
 router.options('/changePassword');
 router.patch('/changePassword', checkAuthorization, async (req, res, next) => {
     let status = 200;
-    const password: string = req.body.password;
-    const confirmPassword: string = req.body.confirmPassword;
+    const password: string | undefined = req.body.password;
+    const confirmPassword: string | undefined = req.body.confirmPassword;
     const errorSubCodes = [];
 
-    if(password.length < 12 || password.length > 30) {
+    if(typeof password === 'undefined' || (password.length < 12 || password.length > 30)) {
         errorSubCodes.push(1);
     }
     
-    if(password !== confirmPassword) {
+    if(typeof confirmPassword === 'undefined' || confirmPassword !== password) {
         errorSubCodes.push(3);
     }
 
     try{
-        const isPasswordSame = await PlayerGateway.checkPasswordsMatch(req.token!.id, password);
+        const isPasswordSame = await PlayerGateway.checkPasswordsMatch(req.token!.id, password!);
 
         if(isPasswordSame){
             errorSubCodes.push(2);
@@ -168,7 +168,7 @@ router.patch('/changePassword', checkAuthorization, async (req, res, next) => {
         if(errorSubCodes.length){
             status = 400;
         }else{
-            await PlayerGateway.changePassword(req.token!.id, password);
+            await PlayerGateway.changePassword(req.token!.id, password!);
         }
 
         res.status(status).json(errorSubCodes);

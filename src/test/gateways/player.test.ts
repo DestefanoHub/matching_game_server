@@ -194,6 +194,42 @@ describe('Player Gateway Delete Player operations', () => {
     after(async () => {
         await destroyPlayers();
     });
+
+    test('player deletion successful', async () => {
+        const playerToDelete = await PlayerGateway.insertPlayer('tester3', 'password1234');
+
+        expect(playerToDelete).to.have.property('deletedAt');
+        expect(playerToDelete.deletedAt).to.be.null;
+
+        await PlayerGateway.deletePlayer(playerToDelete._id.toString());
+
+        const deletedPlayer = await Player.findOne({_id: playerToDelete._id}).exec();
+
+        expect(deletedPlayer).to.have.property('deletedAt');
+        expect(deletedPlayer!.deletedAt).to.not.be.null;
+    });
+
+    test('player deletion failed: player already deleted', async () => {
+        const deletedPlayer = await Player.findOne({name: 'tester2'}).exec();
+
+        await expect(PlayerGateway.deletePlayer(deletedPlayer!.id)).to.be.rejectedWith(/404/);
+
+        const playerAfterDeletion = await Player.findOne({_id: deletedPlayer!.id}).exec();
+
+        expect(playerAfterDeletion!.deletedAt?.toString()).to.equal(deletedPlayer?.deletedAt?.toString());
+    });
+
+    test('player deletion failed: id does not exist but is a valid ObjectId (24 hex characters)', async () => {        
+        await expect(PlayerGateway.deletePlayer('abcd1234abcd1234abcd1234')).to.be.rejectedWith(/404/);
+    });
+
+    test('player deletion failed: id does not exist and is not valid ObjectId (24 hex characters)', async () => {        
+        await expect(PlayerGateway.deletePlayer('abcd1234')).to.be.rejectedWith(/400/);
+    });
+
+    test('player deletion failed: blank id', async () => {        
+        await expect(PlayerGateway.deletePlayer('')).to.be.rejectedWith(/400/);
+    });
 });
 
 describe('Player Gateway Change Password operations', () => {    
@@ -203,6 +239,50 @@ describe('Player Gateway Change Password operations', () => {
 
     after(async () => {
         await destroyPlayers();
+    });
+
+    test('player change password successful', async () => {
+        const playerToChange = await PlayerGateway.insertPlayer('tester3', 'password1234');
+
+        await PlayerGateway.changePassword(playerToChange._id.toString(), 'password5678');
+
+        const changedPlayer = await Player.findOne({_id: playerToChange._id}).exec();
+
+        expect(changedPlayer!.password).to.not.equal(playerToChange.password);
+        expect(changedPlayer!.salt).to.not.equal(playerToChange.salt);
+    });
+
+    test('player change password failed: player deleted', async () => {
+        const deletedPlayer = await Player.findOne({name: 'tester2'}).exec();
+
+        await expect(PlayerGateway.changePassword(deletedPlayer!.id, 'password5678')).to.be.rejectedWith(/404/);
+
+        const playerAfterChange = await Player.findOne({_id: deletedPlayer!.id}).exec();
+
+        expect(playerAfterChange?.password).to.equal(deletedPlayer?.password);
+        expect(playerAfterChange?.salt).to.equal(deletedPlayer?.salt);
+    });
+
+    test('player change password failed: id does not exist but is a valid ObjectId (24 hex characters)', async () => {        
+        await expect(PlayerGateway.changePassword('abcd1234abcd1234abcd1234', 'password5678')).to.be.rejectedWith(/404/);
+    });
+
+    test('player change password failed: id does not exist and is not valid ObjectId (24 hex characters)', async () => {        
+        await expect(PlayerGateway.changePassword('abcd1234', 'password5678')).to.be.rejectedWith(/400/);
+    });
+
+    test('player change password failed: blank id', async () => {        
+        await expect(PlayerGateway.changePassword('', 'password5678')).to.be.rejectedWith(/400/);
+    });
+
+    test('player change password failed: blank password', async () => {        
+        const player = await Player.findOne({name: 'tester3'}).exec();
+        
+        await expect(PlayerGateway.changePassword(player!.id, '')).to.be.rejectedWith(/400/);
+    });
+
+    test('player change password failed: blank id and password', async () => {        
+        await expect(PlayerGateway.changePassword('', '')).to.be.rejectedWith(/400/);
     });
 });
 

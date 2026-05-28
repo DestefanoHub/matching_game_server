@@ -25,16 +25,15 @@ export function checkAuthorization(req: Request, res: Response, next: NextFuncti
         }) as JwtPayload;
 
         if(typeof authorized === 'object'){
-            
             req.token = authorized;
         }else{
             return res.sendStatus(401);
         }
     }catch(error){
         throw new Error("401", {cause: error});
-    }finally{
-        next();
     }
+
+    next();
 }
 
 export function generateToken(playerID: Types.ObjectId, username: string): string{

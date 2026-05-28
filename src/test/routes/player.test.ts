@@ -1,13 +1,12 @@
-import { describe, test, before, beforeEach, after, afterEach } from 'mocha';
-import { expect, use as chaiUse } from 'chai';
+import { describe, test, before, after } from 'mocha';
+import { expect } from 'chai';
 import request from 'supertest';
-// import chaiAsPromised from 'chai-as-promised';
 
 import app from '../../app.js';
 import { initPlayers, destroyPlayers } from '../database-config.js';
 import { Player } from '../../models/Player.js';
-
-// chaiUse(chaiAsPromised);
+import { generateToken } from '../../auth.js';
+import PlayerGateway from '../../gateways/player.js';
 
 const server = app.listen();
 const agent = request.agent(server);
@@ -15,7 +14,6 @@ const agent = request.agent(server);
 after(() => {
     server.close();
 })
-
 
 describe('Server Create Player Account operations', () => {
     before(async () => {
@@ -679,6 +677,335 @@ describe('Server Login operations', () => {
     });
 });
 
-//change password
+describe('Server Change Password operations', () => {    
+    let player1Auth: string | null = null;
+    let player2Auth: string | null = null;
+    
+    before(async () => {
+        await initPlayers();
 
-//delete
+        const player1 = await Player.findOne({name: 'tester1'}).exec();
+        player1Auth = generateToken(player1!.id, player1!.name);
+
+        const player2 = await Player.findOne({name: 'tester2'}).exec();
+        player2Auth = generateToken(player2!.id, player2!.name);
+    });
+
+    after(async () => {
+        await destroyPlayers();
+    });
+
+    test('player change password successful', async () => {
+        const payload = {
+            password: 'passwordpassword',
+            confirmPassword: 'passwordpassword'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(200);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(0);
+    });
+
+    test('player change password failed: no auth header', async () => {
+        const payload = {
+            password: 'passwordpassword',
+            confirmPassword: 'passwordpassword'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json');
+
+        expect(response.status).to.equal(401);
+        expect(response.body).to.be.empty;
+    });
+
+    test('player change password failed: auth header invalid', async () => {
+        const payload = {
+            password: 'passwordpassword',
+            confirmPassword: 'passwordpassword'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', 'Bearer garbagevalue');
+
+        expect(response.status).to.equal(401);
+        expect(response.body).to.be.empty;
+    });
+
+    test('player change password failed: player deleted', async () => {
+        const payload = {
+            password: 'passwordpassword',
+            confirmPassword: 'passwordpassword'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player2Auth}`);
+
+        expect(response.status).to.equal(404);
+        expect(response.body).to.be.empty;
+    });
+
+    test('player change password failed: password too short', async () => {        
+        const payload = {
+            password: 'password',
+            confirmPassword: 'password'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(1);
+        expect(rBody[0]).to.equal(1);
+    });
+
+    test('player change password failed: password too long', async () => {        
+        const payload = {
+            password: 'password1234password1234password1234',
+            confirmPassword: 'password1234password1234password1234'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(1);
+        expect(rBody[0]).to.equal(1);
+    });
+
+    test('player change password failed: password and confirmPassword do not match', async () => {        
+        const payload = {
+            password: 'password5678',
+            confirmPassword: 'password9101'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(1);
+        expect(rBody[0]).to.equal(3);
+    });
+
+    test('player change password failed: password is current password', async () => {        
+        const payload = {
+            password: 'passwordpassword',
+            confirmPassword: 'passwordpassword'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(1);
+        expect(rBody[0]).to.equal(2);
+    });
+
+    test('player change password failed: blank password', async () => {        
+        const payload = {
+            password: '',
+            confirmPassword: 'password5678'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(2);
+        expect(rBody[0]).to.equal(1);
+        expect(rBody[1]).to.equal(3);
+    });
+
+    test('player change password failed: no password', async () => {        
+        const payload = {
+            confirmPassword: 'password5678'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(2);
+        expect(rBody[0]).to.equal(1);
+        expect(rBody[1]).to.equal(3);
+    });
+
+    test('player change password failed: blank confirmPassword', async () => {        
+        const payload = {
+            password: 'password5678',
+            confirmPassword: ''
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(1);
+        expect(rBody[0]).to.equal(3);
+    });
+
+    test('player change password failed: no confirmPassword', async () => {        
+        const payload = {
+            password: 'password5678'
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(1);
+        expect(rBody[0]).to.equal(3);
+    });
+
+    test('player change password failed: blank password and confirmPassword', async () => {        
+        const payload = {
+            password: '',
+            confirmPassword: ''
+        };
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(1);
+        expect(rBody[0]).to.equal(1);
+    });
+
+    test('player change password failed: empty body', async () => {        
+        const payload = {};
+        
+        const response = await agent.patch('/player/changePassword')
+            .send(payload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(2);
+        expect(rBody[0]).to.equal(1);
+        expect(rBody[1]).to.equal(3);
+    });
+
+    test('player change password failed: no body', async () => {                
+        const response = await agent.patch('/player/changePassword')
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${player1Auth}`);
+
+        const rBody = response.body;
+        expect(response.status).to.equal(400);
+        expect(response.headers['content-type']).to.match(/(application\/json)/);
+        expect(rBody).to.be.an('array');
+        expect(rBody).to.have.lengthOf(2);
+        expect(rBody[0]).to.equal(1);
+        expect(rBody[1]).to.equal(3);
+    });
+});
+
+describe('Server Delete Player operations', () => {    
+    let player2Auth: string | null = null;
+    
+    before(async () => {
+        await initPlayers();
+
+        const player2 = await Player.findOne({name: 'tester2'}).exec();
+        player2Auth = generateToken(player2!.id, player2!.name);
+    });
+
+    after(async () => {
+        await destroyPlayers();
+    });
+
+    test('player deletion successful', async () => {
+        await PlayerGateway.insertPlayer('tester3', 'password1234');
+        const player3 = await Player.findOne({name: 'tester3'}).exec();
+        const player3Auth = generateToken(player3!.id, player3!.name);
+        
+        const response = await agent.delete('/player/deleteAccount')
+            .set('Authorization', `Bearer ${player3Auth}`);
+
+        expect(response.status).to.equal(204);
+        expect(response.body).to.be.empty;
+    });
+
+    test('player deletion failed: no auth header', async () => {        
+        const response = await agent.delete('/player/deleteAccount');
+
+        expect(response.status).to.equal(401);
+        expect(response.body).to.be.empty;
+    });
+
+    test('player deletion failed: auth header invalid', async () => {        
+        const response = await agent.delete('/player/deleteAccount')
+            .set('Authorization', 'Bearer garbagevalue');
+
+        expect(response.status).to.equal(401);
+        expect(response.body).to.be.empty;
+    });
+
+    test('player deletion failed: player already deleted', async () => {        
+        const response = await agent.delete('/player/deleteAccount')
+            .set('Authorization', `Bearer ${player2Auth}`);
+
+        expect(response.status).to.equal(404);
+        expect(response.body).to.be.empty;
+    });
+});

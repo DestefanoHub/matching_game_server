@@ -62,10 +62,23 @@ export async function destroyPlayers(){
 }
 
 export async function initGames(){
-    await initPlayers();
+    const players: TestPlayer[] = [
+        {name: 'tester100', password: 'password1234'},
+        {name: 'tester200', password: 'password1234', deletedAt: new Date(new Date().getTime() - (10 * 60 * 1000))}
+    ];
+
+    for(const player of players){
+        const salt = await bcrypt.genSalt();
+        const hash = await bcrypt.hash('password1234', salt);
+
+        player.password = hash;
+        player.salt = salt;
+    }
+
+    await Player.insertMany(players);
     
-    const player1 = await Player.findOne({name: 'tester1'}).exec();
-    const player2 = await Player.findOne({name: 'tester2'}).exec();
+    const player1 = await Player.findOne({name: 'tester100'}).exec();
+    const player2 = await Player.findOne({name: 'tester200'}).exec();
     
     const games: TestGame[] = [
         {
@@ -182,5 +195,6 @@ export async function initGames(){
 }
 
 export async function destroyGames(){
+    await destroyPlayers();
     await mongoose.connection.dropCollection('games');
 }

@@ -5,7 +5,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import pluginChaiFriendly from 'eslint-plugin-chai-friendly';
 
 export default defineConfig([
-  globalIgnores(['dist', 'logs']),
+  globalIgnores(['.vscode/', 'dist/', 'logs/', '**/*.js', '**/*.cjs', '**/*.mjs']),
   { 
     files: ["**/*.ts"],
     plugins: { 

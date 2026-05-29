@@ -4,7 +4,9 @@ export type SortBy = 'sa'|'sd'|'da'|'dd';
 
 export type WinLoss = 'w'|'l'|'a';
 
-export type Difficulty = 0|1|2|3;
+export type Difficulty = 1|2|3;
+
+export type SearchDifficulty = 0|1|2|3;
 
 export function isSortByType(value: unknown): value is SortBy {
     return ['sa', 'sd', 'da', 'dd'].includes(value as string);
@@ -15,6 +17,10 @@ export function isWinLossType(value: unknown): value is WinLoss {
 }
 
 export function isDifficultyType(value: unknown): value is Difficulty {
+    return [1, 2, 3].includes(value as number);
+}
+
+export function isSearchDifficultyType(value: unknown): value is SearchDifficulty {
     return [0, 1, 2, 3].includes(value as number);
 }
 
@@ -22,7 +28,7 @@ export type Game = {
     _id: Types.ObjectId,
     date?: Date,
     player: GamePlayer,
-    difficulty: number,
+    difficulty: Difficulty,
     hasWon: boolean,
     points: number,
     totalPoints: number,

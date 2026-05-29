@@ -19,7 +19,8 @@ const gameSchema = new Schema<GameType>({
     },
     date: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        required: true
     },
     difficulty: {
         type: Number,

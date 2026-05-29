@@ -1,7 +1,7 @@
 import { Types, type HydratedDocument } from 'mongoose';
 
 import { Game } from '../models/Game.js';
-import type { Game as GameType, Difficulty, SortBy, WinLoss, GamePlayer } from '../types.js';
+import type { Game as GameType, Difficulty, SearchDifficulty, SortBy, WinLoss, GamePlayer } from '../types.js';
 
 type SortParams = {
     sort: {
@@ -13,7 +13,7 @@ type SortParams = {
 type WhereParams = {
     'player.username'?: string,
     hasWon?: boolean,
-    difficulty?: Difficulty
+    difficulty?: SearchDifficulty
 };
 
 type PlayerStats = {
@@ -35,6 +35,23 @@ type MultiGamesData = {
 };
 
 export default abstract class GameGateway {    
+    /*
+    * As this is the gateway, this method does not handle business logic. Therefore, this method does not attempt to
+    * enforce any constraints/conditions on the data provided to it, outside of the database erroring due to a constraint
+    * violation. If this method is to be called, the caller is responsible for ensuring the validity of the data passed to it.
+    * 
+    * This does not verify the following conditions:
+    *  - that the player is a valid, active player
+    *  - if hasWon = true:
+    *   * time < 60
+    *   * points = totalPoints
+    *  - if hasWon = false:
+    *   * time = 60
+    *   * points < totalPoints
+    *  - if difficulty = 1 totalPoints = 6
+    *  - if difficulty = 2 totalPoints = 9
+    *  - if difficulty = 3 totalPoints = 12 
+    */
     public static async insertGame(player: GamePlayer, difficulty: Difficulty, hasWon: boolean, points: number, totalPoints: number, time: number): Promise<GameType> {
         const game: HydratedDocument<GameType> = new Game({
             player,
@@ -150,7 +167,7 @@ export default abstract class GameGateway {
         }
     }
 
-    public static async getGames(playerName: string|null, winLoss: WinLoss, diff: Difficulty, sortBy: SortBy, page: number): Promise<MultiGamesData> {    
+    public static async getGames(playerName: string|null, winLoss: WinLoss, diff: SearchDifficulty, sortBy: SortBy, page: number): Promise<MultiGamesData> {    
         const gamesData: MultiGamesData = {
             games: [],
             totalGames: 0

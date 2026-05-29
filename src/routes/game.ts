@@ -2,7 +2,7 @@ import express, { type Request } from 'express';
 
 import GameGateway  from '../gateways/game.js';
 import { checkAuthorization } from '../auth.js';
-import { type Difficulty, type WinLoss, type SortBy, isSortByType, isWinLossType, isDifficultyType, type GamePlayer } from '../types.js';
+import { type Difficulty, type SearchDifficulty, type WinLoss, type SortBy, isSortByType, isWinLossType, isSearchDifficultyType, type GamePlayer } from '../types.js';
 
 const router = express.Router();
 
@@ -32,7 +32,7 @@ router.get('/getGames', async (req, res, next) => {
     let gamesData;
     const player = (typeof req.query.player === 'string' && req.query.player.length) ? req.query.player : null;
     const winLoss: WinLoss = (isWinLossType(req.query.winLoss)) ? req.query.winLoss : 'a';
-    const diff: Difficulty = (req.query.diff && isDifficultyType(+req.query.diff)) ? +req.query.diff as Difficulty : 0;
+    const diff: SearchDifficulty = (req.query.diff && isSearchDifficultyType(+req.query.diff)) ? +req.query.diff as SearchDifficulty : 0;
     const sortBy: SortBy = (isSortByType(req.query.sortBy)) ? req.query.sortBy : 'dd';
     const page = (req.query.page) ? +req.query.page : 1;
 

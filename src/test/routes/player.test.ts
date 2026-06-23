@@ -11,7 +11,8 @@ import PlayerGateway from '../../gateways/player.js';
 const server = app.listen();
 const agent = request.agent(server);
 
-after(() => {
+after(async () => {
+    await destroyPlayers();
     server.close();
 })
 
@@ -26,7 +27,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert successful', async () => {
         const payload = {
-            username: 'tester3',
+            username: 'Tester3',
             password: 'password1234',
             confirmPassword: 'password1234'
         };
@@ -93,7 +94,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: blank password', async () => {
         const payload = {
-            username: 'tester4',
+            username: 'Tester4',
             password: '',
             confirmPassword: 'password1234'
         };
@@ -116,7 +117,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: no password', async () => {
         const payload = {
-            username: 'tester4',
+            username: 'Tester4',
             confirmPassword: 'password1234'
         };
         
@@ -138,7 +139,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: blank confirm password', async () => {
         const payload = {
-            username: 'tester4',
+            username: 'Tester4',
             password: 'password1234',
             confirmPassword: ''
         };
@@ -160,7 +161,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: no confirm password', async () => {
         const payload = {
-            username: 'tester4',
+            username: 'Tester4',
             password: 'password1234'
         };
         
@@ -271,7 +272,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: blank password and confirm password', async () => {
         const payload = {
-            username: 'tester4',
+            username: 'Tester4',
             password: '',
             confirmPassword: ''
         };
@@ -293,7 +294,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: no password and confirm password', async () => {
         const payload = {
-            username: 'tester4'
+            username: 'Tester4'
         };
         
         const response = await agent.post('/player/createAccount')
@@ -358,7 +359,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: password too short', async () => {
         const payload = {
-            username: 'tester4',
+            username: 'Tester4',
             password: 'password',
             confirmPassword: 'password'
         };
@@ -380,7 +381,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: password too long', async () => {
         const payload = {
-            username: 'tester4',
+            username: 'Tester4',
             password: 'password1234password1234password1234',
             confirmPassword: 'password1234password1234password1234'
         };
@@ -402,7 +403,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: password and confirm password do not match', async () => {
         const payload = {
-            username: 'tester4',
+            username: 'Tester4',
             password: 'password1234',
             confirmPassword: 'password12345678'
         };
@@ -424,7 +425,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: duplicate username', async () => {
         const payload = {
-            username: 'tester1',
+            username: 'Tester1',
             password: 'password1234',
             confirmPassword: 'password1234'
         };
@@ -468,7 +469,7 @@ describe('Server Create Player Account operations', () => {
 
     test('player insert failed: duplicate username of deleted user', async () => {
         const payload = {
-            username: 'tester2',
+            username: 'Tester2',
             password: 'password1234',
             confirmPassword: 'password1234'
         };
@@ -500,7 +501,7 @@ describe('Server Login operations', () => {
     
     test('player login successful', async () => {
         const payload = {
-            username: 'tester1',
+            username: 'Tester1',
             password: 'password1234'
         };
 
@@ -515,7 +516,7 @@ describe('Server Login operations', () => {
         expect(Object.hasOwn(response.body, 'ID')).to.be.true;
         expect(response.body.ID).to.equal(dbPlayer!.id);
         expect(Object.hasOwn(response.body, 'username')).to.be.true;
-        expect(response.body.username).to.equal('tester1');
+        expect(response.body.username).to.equal('Tester1');
         expect(Object.hasOwn(response.body, 'JWT')).to.be.true;
     });
 
@@ -549,7 +550,7 @@ describe('Server Login operations', () => {
 
     test('player login failed: correct username, incorrect password wrong case', async () => {
         const payload = {
-            username: 'tester1',
+            username: 'Tester1',
             password: 'PaSsWoRd1234'
         };
         
@@ -563,7 +564,7 @@ describe('Server Login operations', () => {
 
     test('player login failed: correct username, incorrect password', async () => {
         const payload = {
-            username: 'tester1',
+            username: 'Tester1',
             password: 'wrongpassword'
         };
         
@@ -605,7 +606,7 @@ describe('Server Login operations', () => {
 
     test('player login failed: blank password', async () => {
         const payload = {
-            username: 'tester1',
+            username: 'Tester1',
             password: ''
         };
         
@@ -646,7 +647,7 @@ describe('Server Login operations', () => {
 
     test('player login failed: no password', async () => {
         const payload = {
-            username: 'tester1'
+            username: 'Tester1'
         };
         
         const response = await agent.post('/player/login')
@@ -684,10 +685,10 @@ describe('Server Change Password operations', () => {
     before(async () => {
         await initPlayers();
 
-        const player1 = await Player.findOne({name: 'tester1'}).exec();
+        const player1 = await Player.findOne({name: 'Tester1'}).exec();
         player1Auth = generateToken(player1!.id, player1!.name);
 
-        const player2 = await Player.findOne({name: 'tester2'}).exec();
+        const player2 = await Player.findOne({name: 'Tester2'}).exec();
         player2Auth = generateToken(player2!.id, player2!.name);
     });
 
@@ -966,7 +967,7 @@ describe('Server Delete Player operations', () => {
     before(async () => {
         await initPlayers();
 
-        const player2 = await Player.findOne({name: 'tester2'}).exec();
+        const player2 = await Player.findOne({name: 'Tester2'}).exec();
         player2Auth = generateToken(player2!.id, player2!.name);
     });
 
@@ -975,8 +976,8 @@ describe('Server Delete Player operations', () => {
     });
 
     test('player deletion successful', async () => {
-        await PlayerGateway.insertPlayer('tester3', 'password1234');
-        const player3 = await Player.findOne({name: 'tester3'}).exec();
+        await PlayerGateway.insertPlayer('Tester3', 'password1234');
+        const player3 = await Player.findOne({name: 'Tester3'}).exec();
         const player3Auth = generateToken(player3!.id, player3!.name);
         
         const response = await agent.delete('/player/deleteAccount')

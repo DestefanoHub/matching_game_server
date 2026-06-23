@@ -73,7 +73,7 @@ router.get('/getRecentGames/:playerID?', async (req: Request<recentGamesParams>,
 
 router.options('/saveGame');
 router.post('/saveGame', checkAuthorization, async (req, res, next) => {    
-    const player: GamePlayer = req.body.player;
+    const playerID: string = req.body.playerID;
     const difficulty: Difficulty = req.body.difficulty;
     const hasWon: boolean = req.body.hasWon;
     const points: number = req.body.points;
@@ -81,7 +81,7 @@ router.post('/saveGame', checkAuthorization, async (req, res, next) => {
     const time: number = req.body.time;
 
     try{
-        await GameGateway.insertGame(player, difficulty, hasWon, points, totalPoints, time);
+        await GameGateway.insertGame(playerID, difficulty, hasWon, points, totalPoints, time);
         
         res.status(201).end();
     }catch(error){

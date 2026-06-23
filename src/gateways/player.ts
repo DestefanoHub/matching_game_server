@@ -17,9 +17,11 @@ export default abstract class PlayerGateway {
 
             const salt = await bcrypt.genSalt();
             const hash = await bcrypt.hash(password, salt);
+            const uniqueName = name.toLowerCase();
             
             const player: HydratedDocument<PlayerType> = new Player({
                 name,
+                uniqueName,
                 password: hash,
                 salt
             });
@@ -57,11 +59,9 @@ export default abstract class PlayerGateway {
         try{
             /*
             * This should check all usernames, not just for active players.
-            * Need to use the collation method as you can't pass collation as options to the find method.
-            * The collation makes the search case-insensitive.
             */
             if(username.trim().length !== 0){
-                return await Player.find({name: username.trim()}).collation({locale: 'en_US', strength: 1, caseLevel: false}).countDocuments();
+                return await Player.find({uniqueName: username.trim().toLowerCase()}).countDocuments();
             }
 
             throw new Error('400', {cause: 'Username given for comparison is blank.'});

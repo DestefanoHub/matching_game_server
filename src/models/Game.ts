@@ -7,9 +7,17 @@ const Schema = mongoose.Schema;
 const gamePlayerSchema = new Schema<GamePlayer>({
     pid: {
         type: String,
-        index: 1
+        required: true
     },
-    username: String
+    username: { 
+        type: String,
+        required: true
+    },
+    uniqueName: {
+        type: String,
+        required: true,
+        index: true
+    }
 }, { _id: false });
 
 const gameSchema = new Schema<GameType>({
@@ -49,7 +57,5 @@ const gameSchema = new Schema<GameType>({
         required: true
     }
 });
-
-gameSchema.index({'player.username': 1}, {collation: {locale: 'en_US', strength: 1, caseLevel: false}});
 
 export const Game = mongoose.model<GameType>('Game', gameSchema);

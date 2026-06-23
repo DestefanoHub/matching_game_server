@@ -1,6 +1,7 @@
 import { Types, type HydratedDocument } from 'mongoose';
 
 import { Game } from '../models/Game.js';
+import PlayerGateway from './player.js';
 import type { Game as GameType, Difficulty, SearchDifficulty, SortBy, WinLoss, GamePlayer } from '../types.js';
 
 type SortParams = {
@@ -11,7 +12,7 @@ type SortParams = {
 };
 
 type WhereParams = {
-    'player.username'?: string,
+    'player.uniqueName'?: string,
     hasWon?: boolean,
     difficulty?: SearchDifficulty
 };
@@ -52,19 +53,30 @@ export default abstract class GameGateway {
     *  - if difficulty = 2 totalPoints = 9
     *  - if difficulty = 3 totalPoints = 12 
     */
-    public static async insertGame(player: GamePlayer, difficulty: Difficulty, hasWon: boolean, points: number, totalPoints: number, time: number): Promise<GameType> {
-        const game: HydratedDocument<GameType> = new Game({
-            player,
-            difficulty,
-            hasWon,
-            points,
-            totalPoints,
-            time
-        });
-
+    public static async insertGame(playerID: string, difficulty: Difficulty, hasWon: boolean, points: number, totalPoints: number, time: number): Promise<GameType> {
         try{
+            const gamePlayerData = await PlayerGateway.getPlayerByID(playerID);
+            const player = {
+                pid: gamePlayerData._id,
+                username: gamePlayerData.name,
+                uniqueName: gamePlayerData.uniqueName
+            };
+
+            const game: HydratedDocument<GameType> = new Game({
+                player,
+                difficulty,
+                hasWon,
+                points,
+                totalPoints,
+                time
+            });
+
             return await game.save();
         }catch(error){
+            if(error instanceof Error && error.message === '404'){
+                throw error;
+            }
+
             throw new Error("400", {cause: error});
         }    
     }
@@ -178,7 +190,7 @@ export default abstract class GameGateway {
 
         //optional player search
         if(playerName !== null){
-            whereParams = {'player.username': playerName};
+            whereParams = {'player.uniqueName': playerName.toLowerCase()};
         }
 
         //required win/loss filter
@@ -244,14 +256,7 @@ export default abstract class GameGateway {
                         games: [{ $skip: (page * recordsPerPage) - recordsPerPage }, { $limit: recordsPerPage }],
                     },
                 },
-            ],
-            {
-                collation: {
-                    locale: 'en_US',
-                    strength: 1,
-                    caseLevel: false
-                }
-            });
+            ]);
 
             for await(const queryData of gamesCursor) {
                 //Need to check if the array is empty becuase this assignment errors if the query returns no results.

@@ -38,6 +38,7 @@ export type Game = {
 export type Player = {
     _id: Types.ObjectId,
     name: string,
+    uniqueName: string,
     password?: string,
     salt?: string,
     deletedAt?: Date
@@ -45,5 +46,6 @@ export type Player = {
 
 export type GamePlayer = {
     pid: string,
-    username: string
+    username: string,
+    uniqueName: string
 };

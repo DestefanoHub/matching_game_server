@@ -8,6 +8,7 @@ import type { Difficulty, GamePlayer } from '../types.js';
 
 type TestPlayer = {
     name: string,
+    uniqueName: string,
     password: string,
     salt?: string,
     deletedAt?: Date
@@ -42,8 +43,8 @@ export async function closeDB(){
 
 export async function initPlayers(){
     const players: TestPlayer[] = [
-        {name: 'tester1', password: 'password1234'},
-        {name: 'tester2', password: 'password1234', deletedAt: new Date(new Date().getTime() - (10 * 60 * 1000))}
+        {name: 'Tester1', uniqueName: 'tester1', password: 'password1234'},
+        {name: 'Tester2', uniqueName: 'tester2', password: 'password1234', deletedAt: new Date(new Date().getTime() - (10 * 60 * 1000))}
     ];
 
     for(const player of players){
@@ -63,8 +64,8 @@ export async function destroyPlayers(){
 
 export async function initGames(){
     const players: TestPlayer[] = [
-        {name: 'tester100', password: 'password1234'},
-        {name: 'tester200', password: 'password1234', deletedAt: new Date(new Date().getTime() - (10 * 60 * 1000))}
+        {name: 'Tester100', uniqueName: 'tester100', password: 'password1234'},
+        {name: 'Tester200', uniqueName: 'tester200', password: 'password1234', deletedAt: new Date(new Date().getTime() - (10 * 60 * 1000))}
     ];
 
     for(const player of players){
@@ -76,14 +77,14 @@ export async function initGames(){
     }
 
     await Player.insertMany(players);
-    
-    const player1 = await Player.findOne({name: 'tester100'}).exec();
-    const player2 = await Player.findOne({name: 'tester200'}).exec();
+
+    const player1 = await Player.findOne({name: 'Tester100'}).exec();
+    const player2 = await Player.findOne({name: 'Tester200'}).exec();
     
     const games: TestGame[] = [
         {
             date: new Date(2026, 0, 1, 0, 0, 0),
-            player: {pid: player1!.id, username: player1!.name},
+            player: {pid: player1!.id, username: player1!.name, uniqueName: player1!.name.toLowerCase()},
             difficulty: 1,
             hasWon: true,
             points: 6,
@@ -92,7 +93,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 2, 0, 0, 0),
-            player: {pid: player1!.id, username: player1!.name},
+            player: {pid: player1!.id, username: player1!.name, uniqueName: player1!.name.toLowerCase()},
             difficulty: 2,
             hasWon: true,
             points: 9,
@@ -101,7 +102,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 3, 0, 0, 0),
-            player: {pid: player1!.id, username: player1!.name},
+            player: {pid: player1!.id, username: player1!.name, uniqueName: player1!.name.toLowerCase()},
             difficulty: 3,
             hasWon: true,
             points: 12,
@@ -110,7 +111,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 4, 0, 0, 0),
-            player: {pid: player1!.id, username: player1!.name},
+            player: {pid: player1!.id, username: player1!.name, uniqueName: player1!.name.toLowerCase()},
             difficulty: 1,
             hasWon: false,
             points: 5,
@@ -119,7 +120,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 5, 0, 0, 0),
-            player: {pid: player1!.id, username: player1!.name},
+            player: {pid: player1!.id, username: player1!.name, uniqueName: player1!.name.toLowerCase()},
             difficulty: 2,
             hasWon: false,
             points: 7,
@@ -128,7 +129,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 6, 0, 0, 0),
-            player: {pid: player1!.id, username: player1!.name},
+            player: {pid: player1!.id, username: player1!.name, uniqueName: player1!.name.toLowerCase()},
             difficulty: 3,
             hasWon: false,
             points: 10,
@@ -137,7 +138,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 1, 1, 0, 0),
-            player: {pid: player2!.id, username: player2!.name},
+            player: {pid: player2!.id, username: player2!.name, uniqueName: player2!.name.toLowerCase()},
             difficulty: 1,
             hasWon: true,
             points: 6,
@@ -146,7 +147,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 2, 1, 0, 0),
-            player: {pid: player2!.id, username: player2!.name},
+            player: {pid: player2!.id, username: player2!.name, uniqueName: player2!.name.toLowerCase()},
             difficulty: 2,
             hasWon: true,
             points: 9,
@@ -155,7 +156,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 3, 1, 0, 0),
-            player: {pid: player2!.id, username: player2!.name},
+            player: {pid: player2!.id, username: player2!.name, uniqueName: player2!.name.toLowerCase()},
             difficulty: 3,
             hasWon: true,
             points: 12,
@@ -164,7 +165,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 4, 1, 0, 0),
-            player: {pid: player2!.id, username: player2!.name},
+            player: {pid: player2!.id, username: player2!.name, uniqueName: player2!.name.toLowerCase()},
             difficulty: 1,
             hasWon: false,
             points: 5,
@@ -173,7 +174,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 5, 1, 0, 0),
-            player: {pid: player2!.id, username: player2!.name},
+            player: {pid: player2!.id, username: player2!.name, uniqueName: player2!.name.toLowerCase()},
             difficulty: 2,
             hasWon: false,
             points: 7,
@@ -182,7 +183,7 @@ export async function initGames(){
         },
         {
             date: new Date(2026, 0, 6, 1, 0, 0),
-            player: {pid: player2!.id, username: player2!.name},
+            player: {pid: player2!.id, username: player2!.name, uniqueName: player2!.name.toLowerCase()},
             difficulty: 3,
             hasWon: false,
             points: 10,

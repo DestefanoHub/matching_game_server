@@ -73,10 +73,6 @@ export default abstract class GameGateway {
 
             return await game.save();
         }catch(error){
-            if(error instanceof Error && error.message === '404'){
-                throw error;
-            }
-
             throw new Error("400", {cause: error});
         }    
     }
@@ -94,7 +90,13 @@ export default abstract class GameGateway {
         };
 
         try{
-            gameData.game = await Game.findById(id).lean<GameType>().exec() as GameType;
+            const gameRecord = await Game.findById(id).lean<GameType>().exec();
+
+            if(gameRecord === null){
+                throw new Error('404', {cause: `Game with ID: ${id} does not exist.`});
+            }
+
+            gameData.game = gameRecord;
 
             const isFirstGame = await Game.find({
                 'player.pid': gameData.game.player.pid,
@@ -133,17 +135,21 @@ export default abstract class GameGateway {
                 }).countDocuments().exec();
                 gameData.stats.isFastestDiffTime = (!isFastestDiffTime) ? true : false;
             }
+
+            return gameData;
         }catch(error){
+            if(error instanceof Error && error.message === '404'){
+                throw error;
+            }
+
             throw new Error("404", {cause: error});
         }
-
-        return gameData;
     }
 
     public static async getRecentGames(playerID: string | null): Promise<GameType[][]> {
+        const recentGames: GameType[][] = [];
+        
         try{
-            const recentGames: GameType[][] = [];
-
             const allRecentGames = await Game.find({}, {
                 player: 1,
                 hasWon: 1,

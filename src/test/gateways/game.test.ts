@@ -62,10 +62,34 @@ describe('Game Gateway Insert operations', () => {
         await expect(GameGateway.insertGame(player!.id, 'abc', true, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
+    test('game insert failed: incorrect difficulty value null', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, null, true, 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: incorrect difficulty value undefined', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, undefined, true, 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
     test('game insert failed: incorrect hasWon value wrong type', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
         //@ts-expect-error
         await expect(GameGateway.insertGame(player!.id, 1, 'abc', 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: incorrect hasWon value null', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, 1, null, 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: incorrect hasWon value undefined', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, 1, undefined, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect points value out of range', async () => {
@@ -79,6 +103,18 @@ describe('Game Gateway Insert operations', () => {
         await expect(GameGateway.insertGame(player!.id, 1, true, 'abc', 6, 30)).to.be.rejectedWith(/400/);
     });
 
+    test('game insert failed: incorrect points value null', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, 1, true, null, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: incorrect points value undefined', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, 1, true, undefined, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
     test('game insert failed: incorrect totalPoints value out of range', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, 100, 30)).to.be.rejectedWith(/400/);
@@ -90,6 +126,18 @@ describe('Game Gateway Insert operations', () => {
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, 'abc', 30)).to.be.rejectedWith(/400/);
     });
 
+    test('game insert failed: incorrect totalPoints value null', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, 1, true, 6, null, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: incorrect totalPoints value undefined', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, 1, true, 6, undefined, 30)).to.be.rejectedWith(/400/);
+    });
+
     test('game insert failed: incorrect time value out of range', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, 6, -100)).to.be.rejectedWith(/400/);
@@ -99,6 +147,18 @@ describe('Game Gateway Insert operations', () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
         //@ts-expect-error
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, 6, 'abc')).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: incorrect time value null', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, 1, true, 6, 6, null)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: incorrect time value undefined', async () => {
+        const player = await Player.findOne({name: 'Tester100'}).exec();
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(player!.id, 1, true, 6, 6, undefined)).to.be.rejectedWith(/400/);
     });
 });
 
@@ -170,4 +230,26 @@ describe('Game Gateway Get Game Info operations', () => {
     test('get game info failed: blank id', async () => {        
         await expect(GameGateway.getGameInfo('')).to.be.rejectedWith(/404/);
     });
+
+    test('get game info failed: null id', async () => {        
+        //@ts-expect-error
+        await expect(GameGateway.getGameInfo(null)).to.be.rejectedWith(/404/);
+    });
+
+    test('get game info failed: undefined id', async () => {        
+        //@ts-expect-error
+        await expect(GameGateway.getGameInfo(undefined)).to.be.rejectedWith(/404/);
+    });
+});
+
+describe('Game Gateway Get Recent Games operations', async () => {
+    before(async () => {
+        await initGames();
+    });
+
+    after(async () => {
+        await destroyGames();
+    });
+
+    
 });

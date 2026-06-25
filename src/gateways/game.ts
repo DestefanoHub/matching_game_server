@@ -78,18 +78,17 @@ export default abstract class GameGateway {
     }
 
     public static async getGameInfo(id: string | Types.ObjectId): Promise<GameData> {
-        const gameData: GameData = {
-            game: {},
-            stats: {
-                isFirstGame: false,
-                isFirstWin: false,
-                isFirstDiffGame: false,
-                isFirstDiffWin: false,
-                isFastestDiffTime: false
-            }
-        };
-
         try{
+            const gameData: GameData = {
+                game: {},
+                stats: {
+                    isFirstGame: false,
+                    isFirstWin: false,
+                    isFirstDiffGame: false,
+                    isFirstDiffWin: false,
+                    isFastestDiffTime: false
+                }
+            };
             const gameRecord = await Game.findById(id).lean<GameType>().exec();
 
             if(gameRecord === null){
@@ -146,10 +145,9 @@ export default abstract class GameGateway {
         }
     }
 
-    public static async getRecentGames(playerID: string | null): Promise<GameType[][]> {
-        const recentGames: GameType[][] = [];
-        
+    public static async getRecentGames(playerID: string | null): Promise<GameType[][]> {        
         try{
+            const recentGames: GameType[][] = [];
             const allRecentGames = await Game.find({}, {
                 player: 1,
                 hasWon: 1,

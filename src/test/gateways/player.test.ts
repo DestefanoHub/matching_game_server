@@ -38,12 +38,42 @@ describe('Player Gateway Insert Player operations', () => {
         await expect(PlayerGateway.insertPlayer('', 'password1234')).to.be.rejectedWith(/400/);
     });
 
+    test('player insert failed: null username', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.insertPlayer(null, 'password1234')).to.be.rejectedWith(/400/);
+    });
+
+    test('player insert failed: undefined username', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.insertPlayer(undefined, 'password1234')).to.be.rejectedWith(/400/);
+    });
+
     test('player insert failed: blank password', async () => {
         await expect(PlayerGateway.insertPlayer('Tester3', '')).to.be.rejectedWith(/400/);
     });
 
+    test('player insert failed: null password', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.insertPlayer('Tester3', null)).to.be.rejectedWith(/400/);
+    });
+
+    test('player insert failed: undefined password', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.insertPlayer('Tester3', undefined)).to.be.rejectedWith(/400/);
+    });
+
     test('player insert failed: blank username and password', async () => {
         await expect(PlayerGateway.insertPlayer('', '')).to.be.rejectedWith(/400/);
+    });
+
+    test('player insert failed: null username and password', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.insertPlayer(null, null)).to.be.rejectedWith(/400/);
+    });
+
+    test('player insert failed: undefined username and password', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.insertPlayer(undefined, undefined)).to.be.rejectedWith(/400/);
     });
 
     test('player insert failed: username too short', async () => {
@@ -107,6 +137,16 @@ describe('Player Gateway Get Player By ID operations', () => {
     test('player retrieval failed: blank id', async () => {        
         await expect(PlayerGateway.getPlayerByID('')).to.be.rejectedWith(/400/);
     });
+
+    test('player retrieval failed: null id', async () => {  
+        //@ts-expect-error      
+        await expect(PlayerGateway.getPlayerByID(null)).to.be.rejectedWith(/404/);
+    });
+
+    test('player retrieval failed: undefined id', async () => {  
+        //@ts-expect-error      
+        await expect(PlayerGateway.getPlayerByID(undefined)).to.be.rejectedWith(/404/);
+    });
 });
 
 describe('Player Gateway Check Username Exists operations', () => {
@@ -148,8 +188,18 @@ describe('Player Gateway Check Username Exists operations', () => {
         expect(uNameCount).to.equal(1);
     });
 
-    test('player username blank (fail)', async () => {
+    test('player username exists (fail): player username blank', async () => {
         await expect(PlayerGateway.checkUsernameExists('')).to.be.rejectedWith(/400/);
+    });
+
+    test('player username exists (fail): player username null', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.checkUsernameExists(null)).to.be.rejectedWith(/400/);
+    });
+
+    test('player username exists (fail): player username undefined', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.checkUsernameExists(undefined)).to.be.rejectedWith(/400/);
     });
 });
 
@@ -183,12 +233,53 @@ describe('Player Gateway Check Passwords Match operations', () => {
         expect(pWordMatch).to.be.true;
     });
 
-    test('player id does not exist (fail)', async () => {
+    test('player passwords match (fail): password provided is blank', async () => {
+        const dbPlayer = await Player.findOne({name: 'Tester1'}).exec();
+        await expect(PlayerGateway.checkPasswordsMatch('abcd1234', '')).to.be.rejectedWith(/404/);
+    });
+
+    test('player passwords match (fail): password provided is null', async () => {
+        const dbPlayer = await Player.findOne({name: 'Tester1'}).exec();
+        //@ts-expect-error
+        await expect(PlayerGateway.checkPasswordsMatch('abcd1234', null)).to.be.rejectedWith(/404/);
+    });
+
+    test('player passwords match (fail): password provided is undefined', async () => {
+        const dbPlayer = await Player.findOne({name: 'Tester1'}).exec();
+        //@ts-expect-error
+        await expect(PlayerGateway.checkPasswordsMatch('abcd1234', undefined)).to.be.rejectedWith(/404/);
+    });
+
+    test('player passwords match (fail): player id does not exist', async () => {
         await expect(PlayerGateway.checkPasswordsMatch('abcd1234', 'password1234')).to.be.rejectedWith(/404/);
     });
 
-    test('player id blank (fail)', async () => {
+    test('player passwords match (fail): player id blank', async () => {
         await expect(PlayerGateway.checkPasswordsMatch('', 'password1234')).to.be.rejectedWith(/404/);
+    });
+
+    test('player passwords match (fail): player id null', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.checkPasswordsMatch(null, 'password1234')).to.be.rejectedWith(/404/);
+    });
+
+    test('player passwords match (fail): player id undefined', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.checkPasswordsMatch(undefined, 'password1234')).to.be.rejectedWith(/404/);
+    });
+
+    test('player passwords match (fail): player id and match password blank', async () => {
+        await expect(PlayerGateway.checkPasswordsMatch('', '')).to.be.rejectedWith(/404/);
+    });
+
+    test('player passwords match (fail): player id and match password null', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.checkPasswordsMatch(null, null)).to.be.rejectedWith(/404/);
+    });
+
+    test('player passwords match (fail): player id and match password undefined', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.checkPasswordsMatch(undefined, undefined)).to.be.rejectedWith(/404/);
     });
 });
 
@@ -236,6 +327,16 @@ describe('Player Gateway Delete Player operations', () => {
     test('player deletion failed: blank id', async () => {        
         await expect(PlayerGateway.deletePlayer('')).to.be.rejectedWith(/400/);
     });
+
+    test('player deletion failed: null id', async () => {        
+        //@ts-expect-error
+        await expect(PlayerGateway.deletePlayer(null)).to.be.rejectedWith(/404/);
+    });
+
+    test('player deletion failed: undefined id', async () => {        
+        //@ts-expect-error
+        await expect(PlayerGateway.deletePlayer(undefined)).to.be.rejectedWith(/404/);
+    });
 });
 
 describe('Player Gateway Change Password operations', () => {    
@@ -281,14 +382,46 @@ describe('Player Gateway Change Password operations', () => {
         await expect(PlayerGateway.changePassword('', 'password5678')).to.be.rejectedWith(/400/);
     });
 
+    test('player change password failed: null id', async () => {        
+        //@ts-expect-error
+        await expect(PlayerGateway.changePassword(null, 'password5678')).to.be.rejectedWith(/404/);
+    });
+
+    test('player change password failed: undefined id', async () => {        
+        //@ts-expect-error
+        await expect(PlayerGateway.changePassword(undefined, 'password5678')).to.be.rejectedWith(/404/);
+    });
+
     test('player change password failed: blank password', async () => {        
         const player = await Player.findOne({name: 'Tester3'}).exec();
         
         await expect(PlayerGateway.changePassword(player!.id, '')).to.be.rejectedWith(/400/);
     });
 
+    test('player change password failed: null password', async () => {        
+        const player = await Player.findOne({name: 'Tester3'}).exec();
+        //@ts-expect-error
+        await expect(PlayerGateway.changePassword(player!.id, null)).to.be.rejectedWith(/400/);
+    });
+
+    test('player change password failed: undefined password', async () => {        
+        const player = await Player.findOne({name: 'Tester3'}).exec();
+        //@ts-expect-error
+        await expect(PlayerGateway.changePassword(player!.id, undefined)).to.be.rejectedWith(/400/);
+    });
+
     test('player change password failed: blank id and password', async () => {        
         await expect(PlayerGateway.changePassword('', '')).to.be.rejectedWith(/400/);
+    });
+
+    test('player change password failed: null id and password', async () => {        
+        //@ts-expect-error
+        await expect(PlayerGateway.changePassword(null, null)).to.be.rejectedWith(/400/);
+    });
+
+    test('player change password failed: undefined id and password', async () => {        
+        //@ts-expect-error
+        await expect(PlayerGateway.changePassword(undefined, undefined)).to.be.rejectedWith(/400/);
     });
 });
 
@@ -318,7 +451,7 @@ describe('Player Gateway Login operations', () => {
         expect(player.deletedAt).to.be.null;
     });
 
-    test('login successful: incorrect username, correct password', async () => {        
+    test('player login failed: incorrect username, correct password', async () => {        
         await expect(PlayerGateway.login('peepeepoopoo', 'password1234')).to.be.rejectedWith(/401/);
     });
 
@@ -342,12 +475,42 @@ describe('Player Gateway Login operations', () => {
         await expect(PlayerGateway.login('', 'password1234')).to.be.rejectedWith(/401/);
     });
 
+    test('player login failed: null username', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.login(null, 'password1234')).to.be.rejectedWith(/401/);
+    });
+
+    test('player login failed: undefined username', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.login(undefined, 'password1234')).to.be.rejectedWith(/401/);
+    });
+
     test('player login failed: blank password', async () => {
         await expect(PlayerGateway.login('Tester1', '')).to.be.rejectedWith(/401/);
     });
 
+    test('player login failed: null password', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.login('Tester1', null)).to.be.rejectedWith(/401/);
+    });
+
+    test('player login failed: undefined password', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.login('Tester1', undefined)).to.be.rejectedWith(/401/);
+    });
+
     test('player login failed: blank username and password', async () => {
         await expect(PlayerGateway.login('', '')).to.be.rejectedWith(/401/);
+    });
+
+    test('player login failed: null username and password', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.login(null, null)).to.be.rejectedWith(/401/);
+    });
+
+    test('player login failed: undefined username and password', async () => {
+        //@ts-expect-error
+        await expect(PlayerGateway.login(undefined, undefined)).to.be.rejectedWith(/401/);
     });
 
     test('player login failed: account has deletedAt set', async () => {

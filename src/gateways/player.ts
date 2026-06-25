@@ -156,10 +156,24 @@ export default abstract class PlayerGateway {
     */
     public static async login(name: string, password: string): Promise<PlayerType> {
         try{
-            const player = await Player.findOne({name, deletedAt: null}).lean<PlayerType>().exec();
+            /*
+            * Optionally chain the trim() calls since this could be null or undefined, and the error should be a 401
+            * in those cases instead of a generic 400 which is what happens when the JS throws an error about being
+            * unable to call trim().
+            */
+            const isNameBlank = name?.trim().length === 0;
+            const isNameMissing = name == null;
+            const isPasswordBlank = password?.trim().length === 0;
+            const isPasswordMissing = password == null;
+
+            if((isNameBlank || isNameMissing) || (isPasswordBlank || isPasswordMissing)){
+                throw new Error('401', {cause: 'Missing required fields.'});
+            }
+            
+            const player = await Player.findOne({name: name.trim(), deletedAt: null}).lean<PlayerType>().exec();
 
             if(player !== null){
-                const isValid = await bcrypt.compare(password, player.password!);
+                const isValid = await bcrypt.compare(password.trim(), player.password!);
 
                 if(isValid){
                     return player;
@@ -167,7 +181,7 @@ export default abstract class PlayerGateway {
             }
 
             throw new Error('401', {cause: 'Invalid credentials.'});
-        }catch(error){
+        }catch(error){            
             if(error instanceof Error && error.message === '401'){
                 throw error;
             }

@@ -6,8 +6,65 @@ import { initGames, destroyGames } from '../database-config.js';
 import { Game } from '../../models/Game.js';
 import { Player } from '../../models/Player.js';
 import GameGateway from '../../gateways/game.js';
+import type { Game as GameType } from '../../types.js';
 
 chaiUse(chaiAsPromised);
+
+type GameCondition = {
+    player?: string,
+    date?: 'asc' | 'desc',
+    score?: 'asc' | 'desc'
+};
+
+function checkGamesMatchCondition(games: GameType[], condition: GameCondition): boolean {
+    let result = false;
+    
+    if(typeof condition.player !== 'undefined'){
+        result = games.every((game, index) => {
+            if(game.player.pid !== condition.player){
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    if(typeof condition.date !== 'undefined'){
+        result = games.every((game, index) => {
+            if(index < games.length - 1){
+                const nextGame = games[index+1];
+                
+                if(typeof game.date !== 'undefined' && typeof nextGame.date !== 'undefined'){
+                    if(condition.date === 'desc' && game.date < nextGame.date){
+                        return false;
+                    }else if(condition.date === 'asc' && game.date > nextGame.date){
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        });
+    }
+
+    if(typeof condition.score !== 'undefined'){
+        result = games.every((game, index) => {
+            if(index < games.length - 1){
+                const nextGame = games[index+1];
+                
+                if(condition.score === 'desc' && game.points < nextGame.points){
+                    return false;
+                }else if(condition.score === 'asc' && game.points > nextGame.points){
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
+
+    return result;
+}
 
 after(async () => {
     await destroyGames();
@@ -251,5 +308,79 @@ describe('Game Gateway Get Recent Games operations', async () => {
         await destroyGames();
     });
 
-    
+    test('get recent games successful: null playerID', async () => {
+        const recentGames = await GameGateway.getRecentGames(null);
+
+        expect(recentGames).to.be.an('array');
+        expect(recentGames).to.have.lengthOf(1);
+        expect(recentGames[0]).to.be.an('array');
+        expect(recentGames[0]).to.have.lengthOf(5);
+
+        const gamesInOrder = checkGamesMatchCondition(recentGames[0], {date: 'desc'});
+        expect(gamesInOrder).to.be.true;
+    });
+
+    test('get recent games successful: playerID given', async () => {
+        const dbPlayer = await Player.findOne({name: 'Tester100'}).exec();
+        const recentGames = await GameGateway.getRecentGames(dbPlayer!.id);
+
+        expect(recentGames).to.be.an('array');
+        expect(recentGames).to.have.lengthOf(2);
+        expect(recentGames[0]).to.be.an('array');
+        expect(recentGames[0]).to.have.lengthOf(5);
+
+        const gamesInOrder = checkGamesMatchCondition(recentGames[0], {date: 'desc'});
+        expect(gamesInOrder).to.be.true;
+
+        expect(recentGames[1]).to.be.an('array');
+        expect(recentGames[1]).to.have.lengthOf(5);
+
+        const playerGamesInOrder = checkGamesMatchCondition(recentGames[1], {date: 'desc'});
+        expect(playerGamesInOrder).to.be.true;
+        const onlyPlayerGames = checkGamesMatchCondition(recentGames[1], {player: dbPlayer!.id});
+        expect(onlyPlayerGames).to.be.true;
+    });
+
+    test('get recent games failed: playerID does not exist but is a valid ObjectId (24 hex characters)', async () => {        
+        await expect(GameGateway.getRecentGames('abcd1234abcd1234abcd1234')).to.be.rejectedWith(/404/);
+    });
+
+    test('get recent games failed: playerID does not exist and is not valid ObjectId (24 hex characters)', async () => {        
+        await expect(GameGateway.getRecentGames('abcd1234')).to.be.rejectedWith(/404/);
+    });
+
+    test('get recent games failed: blank playerID', async () => {        
+        await expect(GameGateway.getRecentGames('')).to.be.rejectedWith(/404/);
+    });
+
+    test('get recent games failed: undefined playerID', async () => {        
+        //@ts-expect-error
+        await expect(GameGateway.getRecentGames(undefined)).to.be.rejectedWith(/404/);
+    });
+});
+
+describe('Game Gateway Get Games operations', async () => {
+    before(async () => {
+        await initGames();
+    });
+
+    after(async () => {
+        await destroyGames();
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty all, date descending, page 1', async () => {
+        const games = await GameGateway.getGames(null, 'a', 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+
+        const gamesInOrder = checkGamesMatchCondition(games.games, {date: 'desc'});
+        expect(gamesInOrder).to.be.true;
+    });
 });

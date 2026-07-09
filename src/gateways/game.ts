@@ -2,7 +2,7 @@ import { Types, type HydratedDocument } from 'mongoose';
 
 import { Game } from '../models/Game.js';
 import PlayerGateway from './player.js';
-import type { Game as GameType, Difficulty, SearchDifficulty, SortBy, WinLoss, GamePlayer } from '../types.js';
+import type { Game as GameType, Difficulty, SearchDifficulty, SortBy, WinLoss } from '../types.js';
 
 type SortParams = {
     sort: {

@@ -107,6 +107,33 @@ describe('Game Gateway Insert operations', () => {
         expect(game.time).to.equal(30);
     });
 
+    test('game insert failed: player is deleted', async () => {
+        const player = await Player.findOne({name: 'Tester200'}).exec();
+        await expect(GameGateway.insertGame(player!.id, 1, true, 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: playerID does not exist but is a valid ObjectId (24 hex characters)', async () => {        
+        await expect(GameGateway.insertGame('abcd1234abcd1234abcd1234', 1, true, 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: playerID does not exist and is not valid ObjectId (24 hex characters)', async () => {        
+        await expect(GameGateway.insertGame('abcd1234', 1, true, 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: blank playerID', async () => {        
+        await expect(GameGateway.insertGame('', 1, true, 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: null playerID', async () => {        
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(null, 1, true, 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
+    test('game insert failed: undefined id', async () => {        
+        //@ts-expect-error
+        await expect(GameGateway.insertGame(undefined, 1, true, 6, 6, 30)).to.be.rejectedWith(/400/);
+    });
+
     test('game insert failed: incorrect difficulty value out of range', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
         //@ts-expect-error
@@ -341,21 +368,53 @@ describe('Game Gateway Get Recent Games operations', async () => {
         expect(onlyPlayerGames).to.be.true;
     });
 
-    test('get recent games failed: playerID does not exist but is a valid ObjectId (24 hex characters)', async () => {        
-        await expect(GameGateway.getRecentGames('abcd1234abcd1234abcd1234')).to.be.rejectedWith(/404/);
+    test('get recent games successful: playerID does not exist but is a valid ObjectId (24 hex characters)', async () => {        
+        const recentGames = await GameGateway.getRecentGames('abcd1234abcd1234abcd1234');
+
+        expect(recentGames).to.be.an('array');
+        expect(recentGames).to.have.lengthOf(2);
+        expect(recentGames[0]).to.be.an('array');
+        expect(recentGames[0]).to.have.lengthOf(5);
+
+        expect(recentGames[1]).to.be.an('array');
+        expect(recentGames[1]).to.have.lengthOf(0);
     });
 
-    test('get recent games failed: playerID does not exist and is not valid ObjectId (24 hex characters)', async () => {        
-        await expect(GameGateway.getRecentGames('abcd1234')).to.be.rejectedWith(/404/);
+    test('get recent games successful: playerID does not exist and is not valid ObjectId (24 hex characters)', async () => {        
+        const recentGames = await GameGateway.getRecentGames('abcd1234');
+
+        expect(recentGames).to.be.an('array');
+        expect(recentGames).to.have.lengthOf(2);
+        expect(recentGames[0]).to.be.an('array');
+        expect(recentGames[0]).to.have.lengthOf(5);
+
+        expect(recentGames[1]).to.be.an('array');
+        expect(recentGames[1]).to.have.lengthOf(0);
     });
 
-    test('get recent games failed: blank playerID', async () => {        
-        await expect(GameGateway.getRecentGames('')).to.be.rejectedWith(/404/);
+    test('get recent games successful: blank playerID', async () => {        
+        const recentGames = await GameGateway.getRecentGames('');
+
+        expect(recentGames).to.be.an('array');
+        expect(recentGames).to.have.lengthOf(2);
+        expect(recentGames[0]).to.be.an('array');
+        expect(recentGames[0]).to.have.lengthOf(5);
+
+        expect(recentGames[1]).to.be.an('array');
+        expect(recentGames[1]).to.have.lengthOf(0);
     });
 
     test('get recent games failed: undefined playerID', async () => {        
         //@ts-expect-error
-        await expect(GameGateway.getRecentGames(undefined)).to.be.rejectedWith(/404/);
+        const recentGames = await GameGateway.getRecentGames(undefined);
+
+        expect(recentGames).to.be.an('array');
+        expect(recentGames).to.have.lengthOf(2);
+        expect(recentGames[0]).to.be.an('array');
+        expect(recentGames[0]).to.have.lengthOf(5);
+
+        expect(recentGames[1]).to.be.an('array');
+        expect(recentGames[1]).to.have.lengthOf(0);
     });
 });
 

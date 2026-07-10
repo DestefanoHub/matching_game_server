@@ -179,7 +179,7 @@ export default abstract class GameGateway {
 
             return recentGames;
         }catch(error){
-            throw new Error("404", {cause: error});
+            throw new Error("400", {cause: error});
         }
     }
 

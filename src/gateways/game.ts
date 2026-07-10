@@ -193,8 +193,8 @@ export default abstract class GameGateway {
         const sortParams: SortParams = {sort: {}};
 
         //optional player search
-        if(playerName !== null){
-            whereParams = {'player.uniqueName': playerName.toLowerCase()};
+        if(playerName !== null && typeof playerName !== 'undefined' && playerName.trim().length > 0){
+            whereParams = {'player.uniqueName': playerName.trim().toLowerCase()};
         }
 
         //required win/loss filter
@@ -271,7 +271,7 @@ export default abstract class GameGateway {
                 gamesData.games = queryData.games;
             }
         }catch(error){
-            throw new Error("404", {cause: error});
+            throw new Error("400", {cause: error});
         }
 
         return gamesData;

@@ -12,16 +12,38 @@ chaiUse(chaiAsPromised);
 
 type GameCondition = {
     player?: string,
-    date?: 'asc' | 'desc',
-    score?: 'asc' | 'desc'
+    win?: boolean,
+    difficulty?: 1|2|3,
+    date?: 'asc'|'desc',
+    score?: 'asc'|'desc'
 };
 
 function checkGamesMatchCondition(games: GameType[], condition: GameCondition): boolean {
     let result = false;
     
     if(typeof condition.player !== 'undefined'){
-        result = games.every((game, index) => {
+        result = games.every((game) => {
             if(game.player.pid !== condition.player){
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    if(typeof condition.win !== 'undefined'){
+        result = games.every((game) => {
+            if(game.hasWon !== condition.win){
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    if(typeof condition.difficulty !== 'undefined'){
+         result = games.every((game) => {
+            if(game.difficulty !== condition.difficulty){
                 return false;
             }
 
@@ -345,6 +367,14 @@ describe('Game Gateway Get Recent Games operations', async () => {
 
         const gamesInOrder = checkGamesMatchCondition(recentGames[0], {date: 'desc'});
         expect(gamesInOrder).to.be.true;
+
+        expect(recentGames[0][0]).to.be.an('object');
+        expect(Object.keys(recentGames[0][0]).length).to.equal(5);
+        expect(recentGames[0][0]).to.have.property('_id');
+        expect(recentGames[0][0]).to.have.property('player');
+        expect(recentGames[0][0]).to.have.property('hasWon');
+        expect(recentGames[0][0]).to.have.property('difficulty');
+        expect(recentGames[0][0]).to.have.property('date');
     });
 
     test('get recent games successful: playerID given', async () => {
@@ -366,6 +396,14 @@ describe('Game Gateway Get Recent Games operations', async () => {
         expect(playerGamesInOrder).to.be.true;
         const onlyPlayerGames = checkGamesMatchCondition(recentGames[1], {player: dbPlayer!.id});
         expect(onlyPlayerGames).to.be.true;
+
+        expect(recentGames[1][0]).to.be.an('object');
+        expect(Object.keys(recentGames[1][0]).length).to.equal(5);
+        expect(recentGames[1][0]).to.have.property('_id');
+        expect(recentGames[1][0]).to.have.property('player');
+        expect(recentGames[1][0]).to.have.property('hasWon');
+        expect(recentGames[1][0]).to.have.property('difficulty');
+        expect(recentGames[1][0]).to.have.property('date');
     });
 
     test('get recent games successful: playerID does not exist but is a valid ObjectId (24 hex characters)', async () => {        
@@ -427,8 +465,91 @@ describe('Game Gateway Get Games operations', async () => {
         await destroyGames();
     });
 
-    test('get games sucessful: player null, winLoss all, difficulty all, date descending, page 1', async () => {
-        const games = await GameGateway.getGames(null, 'a', 0, 'dd', 1);
+    test('get games sucessful: player null, winLoss all, difficulty all, date descending, all pages', async () => {
+        const games1 = await GameGateway.getGames(null, 'a', 0, 'dd', 1);
+
+        expect(games1).to.be.an('object');
+        expect(games1).to.have.property('games');
+        expect(games1).to.have.property('totalGames');
+
+        expect(games1.totalGames).to.equal(12);
+
+        expect(games1.games).to.be.an('array');
+        expect(games1.games).to.have.lengthOf(10);
+
+        const games1InOrder = checkGamesMatchCondition(games1.games, {date: 'desc'});
+        expect(games1InOrder).to.be.true;
+
+        expect(games1.games[0]).to.be.an('object');
+        expect(Object.keys(games1.games[0]).length).to.equal(5);
+        expect(games1.games[0]).to.have.property('_id');
+        expect(games1.games[0]).to.have.property('player');
+        expect(games1.games[0]).to.have.property('hasWon');
+        expect(games1.games[0]).to.have.property('difficulty');
+        expect(games1.games[0]).to.have.property('date');
+
+        const games2 = await GameGateway.getGames(null, 'a', 0, 'dd', 2);
+
+        expect(games2).to.be.an('object');
+        expect(games2).to.have.property('games');
+        expect(games2).to.have.property('totalGames');
+
+        expect(games2.totalGames).to.equal(12);
+
+        expect(games2.games).to.be.an('array');
+        expect(games2.games).to.have.lengthOf(2);
+
+        const games2InOrder = checkGamesMatchCondition(games2.games, {date: 'desc'});
+        expect(games2InOrder).to.be.true;
+    });
+
+    test('get games sucessful: player exists and is active, winLoss all, difficulty all, date descending, page 1', async () => {
+        const dbPlayer = await Player.findOne({name: 'Tester100'}).exec();
+        const games = await GameGateway.getGames('Tester100', 'a', 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(6);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(6);
+
+        const gamesInOrder = checkGamesMatchCondition(games.games, {date: 'desc'});
+        expect(gamesInOrder).to.be.true;
+        const gamesBelongToPlayer = checkGamesMatchCondition(games.games, {player: dbPlayer!.id});
+        expect(gamesBelongToPlayer).to.be.true;
+    });
+
+    test('get games sucessful: player exists and is active but name is wrong case, winLoss all, difficulty all, date descending, page 1', async () => {
+        const games = await GameGateway.getGames('TeStEr100', 'a', 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(6);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(6);
+    });
+
+    test('get games sucessful: player exists but is deleted, winLoss all, difficulty all, date descending, page 1', async () => {
+        const games = await GameGateway.getGames('Tester200', 'a', 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(6);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(6);
+    });
+
+    test('get games sucessful: player is blank, winLoss all, difficulty all, date descending, page 1', async () => {
+        const games = await GameGateway.getGames('', 'a', 0, 'dd', 1);
 
         expect(games).to.be.an('object');
         expect(games).to.have.property('games');
@@ -438,8 +559,51 @@ describe('Game Gateway Get Games operations', async () => {
 
         expect(games.games).to.be.an('array');
         expect(games.games).to.have.lengthOf(10);
+    });
 
-        const gamesInOrder = checkGamesMatchCondition(games.games, {date: 'desc'});
-        expect(gamesInOrder).to.be.true;
+    test('get games sucessful: player is undefined, winLoss all, difficulty all, date descending, page 1', async () => {
+        //@ts-expect-error
+        const games = await GameGateway.getGames(undefined, 'a', 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss win, difficulty all, date descending, page 1', async () => {
+        const games = await GameGateway.getGames(null, 'w', 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(6);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(6);
+
+        const allGamesWon = checkGamesMatchCondition(games.games, {win: true});
+        expect(allGamesWon).to.be.true;
+    });
+
+    test('get games sucessful: player null, winLoss loss, difficulty all, date descending, page 1', async () => {
+        const games = await GameGateway.getGames(null, 'l', 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(6);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(6);
+
+        const allGamesLost = checkGamesMatchCondition(games.games, {win: false});
+        expect(allGamesLost).to.be.true;
     });
 });

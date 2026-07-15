@@ -2,7 +2,7 @@ import express, { type Request } from 'express';
 
 import GameGateway  from '../gateways/game.js';
 import { checkAuthorization } from '../auth.js';
-import { type Difficulty, type SearchDifficulty, type WinLoss, type SortBy, isSortByType, isWinLossType, isSearchDifficultyType, type GamePlayer } from '../types.js';
+import { type Difficulty, type SearchDifficulty, type WinLoss, type SortBy, isSortByType, isWinLossType, isSearchDifficultyType } from '../types.js';
 
 const router = express.Router();
 

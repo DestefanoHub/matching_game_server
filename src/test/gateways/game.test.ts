@@ -147,54 +147,54 @@ describe('Game Gateway Insert operations', () => {
     });
 
     test('game insert failed: null playerID', async () => {        
-        //@ts-expect-error
+        //@ts-expect-error: playerID is null
         await expect(GameGateway.insertGame(null, 1, true, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
-    test('game insert failed: undefined id', async () => {        
-        //@ts-expect-error
+    test('game insert failed: undefined playerID', async () => {        
+        //@ts-expect-error: playerID is undefined
         await expect(GameGateway.insertGame(undefined, 1, true, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect difficulty value out of range', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: difficulty value is not one of the allowed numbers
         await expect(GameGateway.insertGame(player!.id, 5, true, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect difficulty value wrong type', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: difficulty value is wrong type
         await expect(GameGateway.insertGame(player!.id, 'abc', true, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect difficulty value null', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: difficulty value is null
         await expect(GameGateway.insertGame(player!.id, null, true, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect difficulty value undefined', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: difficulty value is undefined
         await expect(GameGateway.insertGame(player!.id, undefined, true, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect hasWon value wrong type', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: hasWon is not a boolean
         await expect(GameGateway.insertGame(player!.id, 1, 'abc', 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect hasWon value null', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: hasWon is null
         await expect(GameGateway.insertGame(player!.id, 1, null, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect hasWon value undefined', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: hasWon is undefined
         await expect(GameGateway.insertGame(player!.id, 1, undefined, 6, 6, 30)).to.be.rejectedWith(/400/);
     });
 
@@ -205,19 +205,19 @@ describe('Game Gateway Insert operations', () => {
 
     test('game insert failed: incorrect points value wrong type', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: points is not a number
         await expect(GameGateway.insertGame(player!.id, 1, true, 'abc', 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect points value null', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: points is null
         await expect(GameGateway.insertGame(player!.id, 1, true, null, 6, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect points value undefined', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: points is undefined
         await expect(GameGateway.insertGame(player!.id, 1, true, undefined, 6, 30)).to.be.rejectedWith(/400/);
     });
 
@@ -228,19 +228,19 @@ describe('Game Gateway Insert operations', () => {
 
     test('game insert failed: incorrect totalPoints value wrong type', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: totalPoints is not a number
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, 'abc', 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect totalPoints value null', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: totalPoints is null
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, null, 30)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect totalPoints value undefined', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: totalPoints is undefined
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, undefined, 30)).to.be.rejectedWith(/400/);
     });
 
@@ -251,19 +251,19 @@ describe('Game Gateway Insert operations', () => {
 
     test('game insert failed: incorrect time value wrong type', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: time is not a number
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, 6, 'abc')).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect time value null', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: time is null
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, 6, null)).to.be.rejectedWith(/400/);
     });
 
     test('game insert failed: incorrect time value undefined', async () => {
         const player = await Player.findOne({name: 'Tester100'}).exec();
-        //@ts-expect-error
+        //@ts-expect-error: time is undefined
         await expect(GameGateway.insertGame(player!.id, 1, true, 6, 6, undefined)).to.be.rejectedWith(/400/);
     });
 });
@@ -338,17 +338,17 @@ describe('Game Gateway Get Game Info operations', () => {
     });
 
     test('get game info failed: null id', async () => {        
-        //@ts-expect-error
+        //@ts-expect-error: game ID is null
         await expect(GameGateway.getGameInfo(null)).to.be.rejectedWith(/404/);
     });
 
     test('get game info failed: undefined id', async () => {        
-        //@ts-expect-error
+        //@ts-expect-error: game ID is undefined
         await expect(GameGateway.getGameInfo(undefined)).to.be.rejectedWith(/404/);
     });
 });
 
-describe('Game Gateway Get Recent Games operations', async () => {
+describe('Game Gateway Get Recent Games operations', () => {
     before(async () => {
         await initGames();
     });
@@ -443,7 +443,7 @@ describe('Game Gateway Get Recent Games operations', async () => {
     });
 
     test('get recent games failed: undefined playerID', async () => {        
-        //@ts-expect-error
+        //@ts-expect-error: playerID is undefined
         const recentGames = await GameGateway.getRecentGames(undefined);
 
         expect(recentGames).to.be.an('array');
@@ -456,7 +456,7 @@ describe('Game Gateway Get Recent Games operations', async () => {
     });
 });
 
-describe('Game Gateway Get Games operations', async () => {
+describe('Game Gateway Get Games operations', () => {
     before(async () => {
         await initGames();
     });
@@ -562,7 +562,7 @@ describe('Game Gateway Get Games operations', async () => {
     });
 
     test('get games sucessful: player is undefined, winLoss all, difficulty all, date descending, page 1', async () => {
-        //@ts-expect-error
+        //@ts-expect-error: playerID is undefined
         const games = await GameGateway.getGames(undefined, 'a', 0, 'dd', 1);
 
         expect(games).to.be.an('object');
@@ -605,5 +605,382 @@ describe('Game Gateway Get Games operations', async () => {
 
         const allGamesLost = checkGamesMatchCondition(games.games, {win: false});
         expect(allGamesLost).to.be.true;
+    });
+
+    test('get games sucessful: player null, winLoss incorrect value, difficulty all, date descending, page 1', async () => {
+        //@ts-expect-error: winLoss incorrect value
+        const games = await GameGateway.getGames(null, 'abcd', 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss wrong type, difficulty all, date descending, page 1', async () => {
+        //@ts-expect-error: winLoss incorrect type
+        const games = await GameGateway.getGames(null, 1234, 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss blank, difficulty all, date descending, page 1', async () => {
+        //@ts-expect-error: winLoss empty string
+        const games = await GameGateway.getGames(null, '', 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss null, difficulty all, date descending, page 1', async () => {
+        //@ts-expect-error: winLoss null
+        const games = await GameGateway.getGames(null, null, 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss undefined, difficulty all, date descending, page 1', async () => {
+        //@ts-expect-error: winLoss undefined
+        const games = await GameGateway.getGames(null, undefined, 0, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty easy, date descending, page 1', async () => {
+        const games = await GameGateway.getGames(null, 'a', 1, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(4);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(4);
+
+        const allGamesEasy = checkGamesMatchCondition(games.games, {difficulty: 1});
+        expect(allGamesEasy).to.be.true;
+    });
+
+    test('get games sucessful: player null, winLoss loss, difficulty normal, date descending, page 1', async () => {
+        const games = await GameGateway.getGames(null, 'a', 2, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(4);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(4);
+
+        const allGamesNormal = checkGamesMatchCondition(games.games, {difficulty: 2});
+        expect(allGamesNormal).to.be.true;
+    });
+
+    test('get games sucessful: player null, winLoss loss, difficulty hard, date descending, page 1', async () => {
+        const games = await GameGateway.getGames(null, 'a', 3, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(4);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(4);
+
+        const allGamesHard = checkGamesMatchCondition(games.games, {difficulty: 3});
+        expect(allGamesHard).to.be.true;
+    });
+
+    test('get games sucessful: player null, winLoss loss, difficulty incorrect value, date descending, page 1', async () => {
+        //@ts-expect-error: difficulty not correct value
+        const games = await GameGateway.getGames(null, 'a', 100, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(0);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(0);
+    });
+
+    test('get games sucessful: player null, winLoss loss, difficulty incorrect type, date descending, page 1', async () => {
+        //@ts-expect-error: difficulty not a number
+        const games = await GameGateway.getGames(null, 'a', 'abcd', 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(0);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(0);
+    });
+
+    test('get games sucessful: player null, winLoss loss, difficulty null, date descending, page 1', async () => {
+        //@ts-expect-error: difficulty null
+        const games = await GameGateway.getGames(null, 'a', null, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(0);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(0);
+    });
+
+    test('get games sucessful: player null, winLoss loss, difficulty undefined, date descending, page 1', async () => {
+        //@ts-expect-error: difficulty undefined
+        const games = await GameGateway.getGames(null, 'a', undefined, 'dd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(0);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(0);
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty all, date ascending, page 1', async () => {
+        const games = await GameGateway.getGames(null, 'a', 0, 'da', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+
+        const allGamesDateAsc = checkGamesMatchCondition(games.games, {date: 'asc'});
+        expect(allGamesDateAsc).to.be.true;
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty all, score descending, page 1', async () => {
+        const games = await GameGateway.getGames(null, 'a', 0, 'sd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+
+        const allGamesScoreDesc = checkGamesMatchCondition(games.games, {score: 'desc'});
+        expect(allGamesScoreDesc).to.be.true;
+        const allGamesDateDesc = checkGamesMatchCondition(games.games, {date: 'desc'});
+        expect(allGamesDateDesc).to.be.true;
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty all, score ascending, page 1', async () => {
+        const games = await GameGateway.getGames(null, 'a', 0, 'sa', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+
+        const allGamesScoreAsc = checkGamesMatchCondition(games.games, {score: 'asc'});
+        expect(allGamesScoreAsc).to.be.true;
+        const allGamesDateDesc = checkGamesMatchCondition(games.games, {date: 'desc'});
+        expect(allGamesDateDesc).to.be.true;
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty all, sort incorrect value, page 1', async () => {
+        //@ts-expect-error: sort is incorrect value
+        const games = await GameGateway.getGames(null, 'a', 0, 'abcd', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty all, sort incorrect type, page 1', async () => {
+        //@ts-expect-error: sort is incorrect type
+        const games = await GameGateway.getGames(null, 'a', 0, 1234, 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty all, sort blank, page 1', async () => {
+        //@ts-expect-error: sort is empty string
+        const games = await GameGateway.getGames(null, 'a', 0, '', 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty all, sort null, page 1', async () => {
+        //@ts-expect-error: sort is null
+        const games = await GameGateway.getGames(null, 'a', 0, null, 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games sucessful: player null, winLoss all, difficulty all, sort undefined, page 1', async () => {
+        //@ts-expect-error: sort is undefined
+        const games = await GameGateway.getGames(null, 'a', 0, undefined, 1);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games failed: page too high', async () => {
+        const games = await GameGateway.getGames(null, 'a', 0, 'dd', 20);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(0);
+    });
+
+    test('get games failed: page too low', async () => {
+        const games = await GameGateway.getGames(null, 'a', 0, 'dd', -6);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games failed: page is zero', async () => {
+        const games = await GameGateway.getGames(null, 'a', 0, 'dd', 0);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games failed: page wrong type', async () => {
+        //@ts-expect-error: page is wrong type
+        const games = await GameGateway.getGames(null, 'a', 0, 'dd', 'abcd');
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games failed: page null', async () => {
+        //@ts-expect-error: page is null
+        const games = await GameGateway.getGames(null, 'a', 0, 'dd', null);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
+    });
+
+    test('get games failed: page undefined', async () => {
+        //@ts-expect-error: page is undefined
+        const games = await GameGateway.getGames(null, 'a', 0, 'dd', undefined);
+
+        expect(games).to.be.an('object');
+        expect(games).to.have.property('games');
+        expect(games).to.have.property('totalGames');
+
+        expect(games.totalGames).to.equal(12);
+
+        expect(games.games).to.be.an('array');
+        expect(games.games).to.have.lengthOf(10);
     });
 });

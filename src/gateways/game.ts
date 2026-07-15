@@ -191,6 +191,7 @@ export default abstract class GameGateway {
         const recordsPerPage = 10;
         let whereParams: WhereParams = {};
         const sortParams: SortParams = {sort: {}};
+        let queryPage = 1;
 
         //optional player search
         if(playerName !== null && typeof playerName !== 'undefined' && playerName.trim().length > 0){
@@ -238,6 +239,10 @@ export default abstract class GameGateway {
             }
         }
 
+        if(page !== null && typeof page !== 'undefined' && Number.isFinite(page) && page > 0){
+            queryPage = page;
+        }
+
         try{
             const gamesCursor = await Game.aggregate([
                 {
@@ -257,7 +262,7 @@ export default abstract class GameGateway {
                 {
                     $facet: {
                         count: [{ $count: 'totalCount' }],
-                        games: [{ $skip: (page * recordsPerPage) - recordsPerPage }, { $limit: recordsPerPage }],
+                        games: [{ $skip: (queryPage * recordsPerPage) - recordsPerPage }, { $limit: recordsPerPage }],
                     },
                 },
             ]);

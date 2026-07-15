@@ -162,9 +162,9 @@ export default abstract class PlayerGateway {
             * unable to call trim().
             */
             const isNameBlank = name?.trim().length === 0;
-            const isNameMissing = name == null;
+            const isNameMissing = (name === null || typeof name === 'undefined') ? true : false;
             const isPasswordBlank = password?.trim().length === 0;
-            const isPasswordMissing = password == null;
+            const isPasswordMissing = (password === null || typeof password === 'undefined') ? true : false;
 
             if((isNameBlank || isNameMissing) || (isPasswordBlank || isPasswordMissing)){
                 throw new Error('401', {cause: 'Missing required fields.'});

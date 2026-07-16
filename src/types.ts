@@ -49,3 +49,21 @@ export type GamePlayer = {
     username: string,
     uniqueName: string
 };
+
+type PlayerStats = {
+    isFirstGame: boolean,
+    isFirstWin: boolean,
+    isFirstDiffGame: boolean,
+    isFirstDiffWin: boolean,
+    isFastestDiffTime: boolean
+};
+
+export type GameData = {
+    game: Game | Record<PropertyKey, never>,
+    stats: PlayerStats
+};
+
+export type MultiGamesData = {
+    games: Game[],
+    totalGames: number
+};

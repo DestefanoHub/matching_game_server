@@ -2,17 +2,21 @@ import express, { type Request } from 'express';
 
 import GameGateway  from '../gateways/game.js';
 import { checkAuthorization } from '../auth.js';
-import { type Difficulty, type SearchDifficulty, type WinLoss, type SortBy, isSortByType, isWinLossType, isSearchDifficultyType } from '../types.js';
+import { type Difficulty, type SearchDifficulty, type WinLoss, type SortBy, type GameData, isSortByType, isWinLossType, isSearchDifficultyType, type MultiGamesData } from '../types.js';
 
 const router = express.Router();
 
 router.get('/getGameInfo/:gameID', async (req, res, next) => {
-    let gameData;
+    let gameData: GameData;
     const gameID = req.params.gameID;
 
-    if(!gameID){
-        throw new Error('400', {cause: 'No game ID provided.'});
-    }
+    /*
+    * This shouldn't ever be needed since Express throws a 404 by default if the required route 
+    * parameter is missing.
+    */
+    // if(!gameID){
+    //     throw new Error('400', {cause: 'No game ID provided.'});
+    // }
 
     try{
         gameData = await GameGateway.getGameInfo(gameID);
@@ -29,7 +33,7 @@ router.get('/getGameInfo/:gameID', async (req, res, next) => {
 
 router.get('/getGames', async (req, res, next) => {
     let status = 200;
-    let gamesData;
+    let gamesData: MultiGamesData;
     const player = (typeof req.query.player === 'string' && req.query.player.length) ? req.query.player : null;
     const winLoss: WinLoss = (isWinLossType(req.query.winLoss)) ? req.query.winLoss : 'a';
     const diff: SearchDifficulty = (req.query.diff && isSearchDifficultyType(+req.query.diff)) ? +req.query.diff as SearchDifficulty : 0;

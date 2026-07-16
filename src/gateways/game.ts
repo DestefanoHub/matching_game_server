@@ -2,7 +2,7 @@ import { Types, type HydratedDocument } from 'mongoose';
 
 import { Game } from '../models/Game.js';
 import PlayerGateway from './player.js';
-import type { Game as GameType, Difficulty, SearchDifficulty, SortBy, WinLoss } from '../types.js';
+import type { Game as GameType, GameData, MultiGamesData, Difficulty, SearchDifficulty, SortBy, WinLoss } from '../types.js';
 
 type SortParams = {
     sort: {
@@ -15,24 +15,6 @@ type WhereParams = {
     'player.uniqueName'?: string,
     hasWon?: boolean,
     difficulty?: SearchDifficulty
-};
-
-type PlayerStats = {
-    isFirstGame: boolean,
-    isFirstWin: boolean,
-    isFirstDiffGame: boolean,
-    isFirstDiffWin: boolean,
-    isFastestDiffTime: boolean
-};
-
-type GameData = {
-    game: GameType | Record<PropertyKey, never>,
-    stats: PlayerStats
-};
-
-type MultiGamesData = {
-    games: GameType[],
-    totalGames: number
 };
 
 export default abstract class GameGateway {    

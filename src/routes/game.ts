@@ -2,7 +2,7 @@ import express, { type Request } from 'express';
 
 import GameGateway  from '../gateways/game.js';
 import { checkAuthorization } from '../auth.js';
-import { type Difficulty, type SearchDifficulty, type WinLoss, type SortBy, type GameData, isSortByType, isWinLossType, isSearchDifficultyType, type MultiGamesData } from '../types.js';
+import { type Difficulty, type SearchDifficulty, type WinLoss, type SortBy, type GameData, isSortByType, isWinLossType, isSearchDifficultyType, type MultiGamesData, type Game, isDifficultyType } from '../types.js';
 
 const router = express.Router();
 
@@ -59,7 +59,7 @@ type recentGamesParams = {
 
 router.get('/getRecentGames/:playerID?', async (req: Request<recentGamesParams>, res, next) => {
     let status = 200;
-    let recentGames;
+    let recentGames: Game[][];
     const playerID = (req.params.playerID) ? req.params.playerID : null;
 
     try{
@@ -77,13 +77,17 @@ router.get('/getRecentGames/:playerID?', async (req: Request<recentGamesParams>,
 
 router.options('/saveGame');
 router.post('/saveGame', checkAuthorization, async (req, res, next) => {    
-    const difficulty: Difficulty = req.body.difficulty;
-    const hasWon: boolean = req.body.hasWon;
-    const points: number = req.body.points;
-    const totalPoints: number = req.body.totalPoints;
-    const time: number = req.body.time;
+    const difficulty: Difficulty | null = (req.body.difficulty && isDifficultyType(+req.body.difficulty)) ? +req.body.difficulty as Difficulty : null;
+    const hasWon: boolean | null = req.body.hasWon ?? null;
+    const points: number | null = req.body.points ?? null;
+    const totalPoints: number | null = req.body.totalPoints ?? null;
+    const time: number | null = req.body.time ?? null;
 
     try{
+        if(difficulty === null || hasWon === null || points === null || totalPoints === null || time === null){
+            throw new Error('400', {cause: 'Missing Game fields.'});
+        }
+
         await GameGateway.insertGame(req.token!.id, difficulty, hasWon, points, totalPoints, time);
         
         res.status(201).end();
